@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PronoPower</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:#0d1525}
+  ::-webkit-scrollbar-thumb{background:#00e676;border-radius:2px}
+  body{min-height:100vh;background:#060b14;font-family:'Bebas Neue','Impact',sans-serif;color:#e8eaf0;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,#00e67610 0%,transparent 70%);pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:24px 16px 80px}
+  .header{text-align:center;margin-bottom:32px}
+  .badge{font-size:11px;letter-spacing:8px;color:#00e676;font-family:'Barlow',sans-serif;font-weight:600;margin-bottom:8px}
+  h1{font-size:clamp(48px,10vw,80px);letter-spacing:4px;line-height:1;color:#fff}
+  h1 span{color:#00e676}
+  .sub{font-family:'Barlow',sans-serif;font-size:14px;color:#6b7a9a;margin-top:8px;font-weight:300}
+  .tabs{display:flex;gap:4px;margin-bottom:28px;background:#0d1525;border-radius:12px;padding:4px}
+  .tab{flex:1;padding:10px 16px;border-radius:9px;border:none;cursor:pointer;background:transparent;color:#6b7a9a;font-family:'Bebas Neue';font-size:16px;letter-spacing:2px;border-bottom:2px solid transparent;transition:all .2s}
+  .tab.active{background:#162235;color:#00e676;border-bottom-color:#00e676}
+  .tab:hover:not(.active){background:#1a2740}
+  .section{display:none}.section.show{display:block;animation:fadeIn .4s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  @keyframes glow{0%,100%{box-shadow:0 0 20px #00e67630}50%{box-shadow:0 0 50px #00e67670}}
+  @keyframes barIn{from{width:0}to{width:var(--w)}}
+  .label{font-family:'Barlow',sans-serif;font-size:11px;letter-spacing:3px;color:#6b7a9a;margin-bottom:10px}
+  .leagues{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:24px;scrollbar-width:thin;scrollbar-color:#00e676 #0d1525}
+  .chip{padding:7px 14px;border:1px solid #1e2e45;border-radius:20px;background:transparent;color:#8a9ab5;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;transition:all .2s;white-space:nowrap;flex-shrink:0}
+  .chip:hover{border-color:#00e676;color:#00e676;transform:translateY(-2px)}
+  .chip.active{border-color:#00e676;background:#00e67615;color:#00e676}
+  .teams-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:24px}
+  .team-block label{display:block;font-family:'Barlow',sans-serif;font-size:11px;letter-spacing:3px;color:#6b7a9a;margin-bottom:8px}
+  select{width:100%;padding:14px 18px;background:#0d1525;border:1px solid #1e2e45;border-radius:10px;color:#e8eaf0;font-family:'Bebas Neue';font-size:18px;letter-spacing:2px;cursor:pointer;-webkit-appearance:none;outline:none}
+  select:focus{border-color:#00e67660}
+  .vs-circle{font-size:22px;color:#00e676;font-family:'Bebas Neue';background:#0d1525;border:1px solid #00e67630;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin:0 auto}
+  #genBtn{width:100%;padding:18px 32px;background:linear-gradient(135deg,#00e676,#00bcd4);border:none;border-radius:12px;color:#060b14;font-family:'Bebas Neue';font-size:22px;letter-spacing:4px;cursor:pointer;transition:all .25s;margin-bottom:28px;animation:glow 2s infinite}
+  #genBtn:hover{transform:translateY(-3px);box-shadow:0 12px 40px #00e67650}
+  #genBtn:active{transform:translateY(0)}
+  #genBtn:disabled{background:#0d1525;border:1px solid #1e2e45;color:#6b7a9a;cursor:not-allowed;animation:none;transform:none;box-shadow:none}
+  .loading-row{display:flex;align-items:center;justify-content:center;gap:12px}
+  .spinner{width:18px;height:18px;border:2px solid #6b7a9a;border-top-color:#00e676;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+  .loading-txt{font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;color:#6b7a9a}
+  #result{animation:fadeIn .5s ease}
+  .live-badge{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .live-dot{width:8px;height:8px;border-radius:50%;background:#00e676;box-shadow:0 0 8px #00e676;flex-shrink:0}
+  .live-txt{font-family:'Barlow',sans-serif;font-size:11px;letter-spacing:3px;color:#00e676}
+  .card{background:#0d1525;border-radius:16px;padding:24px;margin-bottom:14px}
+  .card-sm{background:#0d1525;border-radius:12px;padding:16px;margin-bottom:14px}
+  .verdict-row{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+  .verdict-result{font-size:clamp(24px,5vw,36px);letter-spacing:2px}
+  .verdict-sub{font-family:'Barlow',sans-serif;font-size:13px;color:#8a9ab5;margin-top:4px}
+  .confidence{font-size:48px;line-height:1}
+  .conf-sub{font-family:'Barlow',sans-serif;font-size:12px;color:#6b7a9a;margin-top:2px;text-align:right}
+  .prob-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .prob-label{font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+  .prob-track{flex:1;height:8px;background:#162235;border-radius:4px;overflow:hidden}
+  .prob-bar{height:100%;border-radius:4px;animation:barIn .8s ease forwards}
+  .prob-pct{font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;width:40px;text-align:right;flex-shrink:0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+  .stat-card{background:#0d1525;border:1px solid #1e2e45;border-radius:12px;padding:16px 14px;text-align:center}
+  .stat-val{font-size:clamp(16px,3.5vw,24px);color:#00e676;letter-spacing:1px;margin:6px 0 2px}
+  .stat-sub{font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70}
+  .forme-chips{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .forme-chip{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:14px;letter-spacing:1px}
+  .W{background:#00e67620;border:1px solid #00e676;color:#00e676}
+  .D{background:#ffb30020;border:1px solid #ffb300;color:#ffb300}
+  .L{background:#ff408120;border:1px solid #ff4081;color:#ff4081}
+  .injury-item{font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;margin-bottom:4px;display:flex;gap:6px}
+  .injury-x{color:#ff4081}
+  .star-item{font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;margin-bottom:4px;display:flex;gap:6px}
+  .star-ico{color:#00e676}
+  .none-txt{font-family:'Barlow',sans-serif;font-size:12px;color:#3a4a60}
+  .analyse-txt{font-family:'Barlow',sans-serif;font-size:14px;color:#c0cce0;line-height:1.7;font-weight:300}
+  .factor-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .factor-arrow{color:#00e676;font-family:'Barlow',sans-serif;font-size:13px;font-weight:700;flex-shrink:0;margin-top:1px}
+  .factor-txt{font-family:'Barlow',sans-serif;font-size:13px;color:#c0cce0;line-height:1.5}
+  .disclaimer{font-family:'Barlow',sans-serif;font-size:11px;color:#3a4a60;text-align:center;margin-top:16px;font-style:italic}
+  .hist-card{background:#0a1220;border:1px solid #1e2e45;border-radius:12px;padding:16px 20px;margin-bottom:10px;transition:all .2s}
+  .hist-card:hover{border-color:#00e67640;background:#0d1a2d}
+  .hist-meta{font-family:'Barlow',sans-serif;font-size:12px;color:#6b7a9a;margin-bottom:4px}
+  .hist-teams{font-size:20px;letter-spacing:2px}
+  .hist-vs{color:#3a4a60}
+  .hist-result{font-size:16px;letter-spacing:1px}
+  .hist-score{font-family:'Barlow',sans-serif;font-size:13px;color:#8a9ab5;margin-top:2px}
+  .hist-conf{font-family:'Barlow',sans-serif;font-size:12px}
+  .empty{text-align:center;padding:80px 20px;color:#3a4a60}
+  .empty-icon{font-size:48px;margin-bottom:16px}
+  .empty p{font-family:'Barlow',sans-serif;font-size:16px}
+  .team-info{font-family:'Barlow',sans-serif;font-size:11px;color:#6b7a9a;margin-bottom:6px}
+  @media(max-width:480px){
+    .grid2{grid-template-columns:1fr}
+    .grid3{grid-template-columns:1fr 1fr}
+    .teams-grid{grid-template-columns:1fr}
+    .vs-circle{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="badge">⚡ AI POWERED</div>
+    <h1>PRONO<span>POWER</span></h1>
+    <p class="sub">Pronostics intelligents · Football mondial · 30+ compétitions</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('prono',this)">⚽ Prono</button>
+    <button class="tab" onclick="switchTab('history',this)">📊 Historique</button>
+  </div>
+
+  <div id="prono" class="section show">
+    <div class="label">COMPÉTITION</div>
+    <div class="leagues" id="leagueBar"></div>
+
+    <div class="teams-grid">
+      <div class="team-block">
+        <label>🏠 DOMICILE</label>
+        <select id="homeTeam"></select>
+      </div>
+      <div class="vs-circle">VS</div>
+      <div class="team-block">
+        <label>✈ EXTÉRIEUR</label>
+        <select id="awayTeam"></select>
+      </div>
+    </div>
+
+    <button id="genBtn" onclick="generate()">⚡ GÉNÉRER LE PRONOSTIC</button>
+
+    <div id="result" style="display:none"></div>
+  </div>
+
+  <div id="history" class="section">
+    <div id="histList"></div>
+  </div>
+</div>
+
+<script>
+const LEAGUES = [
+  {id:"ligue1",name:"Ligue 1",flag:"🇫🇷",teams:["PSG","Marseille","Lyon","Monaco","Lille","Nice","Lens","Rennes","Nantes","Toulouse","Strasbourg","Montpellier","Reims","Brest","Le Havre","Metz","Clermont","Lorient","Auxerre","Saint-Étienne"]},
+  {id:"pl",name:"Premier League",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",teams:["Arsenal","Man City","Liverpool","Chelsea","Man United","Tottenham","Newcastle","Aston Villa","West Ham","Brighton","Brentford","Fulham","Crystal Palace","Wolves","Everton","Nottingham Forest","Bournemouth","Burnley","Sheffield United","Luton"]},
+  {id:"laliga",name:"La Liga",flag:"🇪🇸",teams:["Real Madrid","Barcelona","Atlético Madrid","Sevilla","Real Betis","Valencia","Villarreal","Athletic Bilbao","Real Sociedad","Osasuna","Getafe","Girona","Las Palmas","Rayo Vallecano","Celta Vigo","Alavés","Mallorca","Valladolid","Leganés","Espanyol"]},
+  {id:"bundesliga",name:"Bundesliga",flag:"🇩🇪",teams:["Bayern Munich","Dortmund","Leipzig","Bayer Leverkusen","Francfort","Wolfsburg","Stuttgart","Freiburg","Hoffenheim","Union Berlin","Werder Brême","Mainz","Augsburg","Heidenheim","Darmstadt","Cologne","Bochum","Mönchengladbach","Holstein Kiel","St. Pauli"]},
+  {id:"seriea",name:"Serie A",flag:"🇮🇹",teams:["Inter Milan","AC Milan","Juventus","Napoli","Roma","Lazio","Atalanta","Fiorentina","Torino","Bologne","Monza","Sassuolo","Cagliari","Frosinone","Gênes","Udinese","Lecce","Vérone","Empoli","Salernitana"]},
+  {id:"cl",name:"Champions League",flag:"🌟",teams:["Real Madrid","Man City","Bayern Munich","PSG","Barcelona","Inter Milan","Arsenal","Dortmund","Atlético Madrid","Liverpool","Benfica","Porto","Ajax","PSV Eindhoven","Celtic","Rangers","Red Bull Salzbourg","Shakhtar Donetsk","Galatasaray","Fenerbahçe","Braga","Sporting CP","Feyenoord","AZ Alkmaar","Young Boys","Servette","Malmö","Ludogorets","Maccabi Tel Aviv","Union Saint-Gilloise"]},
+  {id:"el",name:"Europa League",flag:"🟠",teams:["Roma","Séville","Villarreal","Man United","Feyenoord","West Ham","Ajax","Bayer Leverkusen","Atalanta","Liverpool","Betis","Eintracht Francfort","Arsenal","Lazio","Napoli","Marseille","Braga","Sporting CP","Monaco","Lille","Rennes","Toulouse","Nice","Lens"]},
+  {id:"eredivisie",name:"Eredivisie",flag:"🇳🇱",teams:["Ajax","PSV Eindhoven","Feyenoord","AZ Alkmaar","Utrecht","Twente","Vitesse","Groningue","Heerenveen","NEC Nimègue","Almere City","Sparta Rotterdam","RKC Waalwijk","Fortuna Sittard","PEC Zwolle","Heracles","Go Ahead Eagles","Excelsior"]},
+  {id:"liga_nos",name:"Liga Portugal",flag:"🇵🇹",teams:["Benfica","Porto","Sporting CP","Braga","Vitória SC","Gil Vicente","Casa Pia","Arouca","Moreirense","Famalicão","Chaves","Vizela","Boavista","Rio Ave","Estrela da Amadora","Farense","Portimonense","Estoril"]},
+  {id:"ligue2",name:"Ligue 2",flag:"🇫🇷",teams:["Bordeaux","Angers","Guingamp","Grenoble","Caen","Dunkerque","Amiens","Troyes","Laval","Pau FC","Rodez","Quevilly-Rouen","Bastia","Concarneau","Valenciennes","Ajaccio","Niort","Saint-Brieuc","Dijon","Sochaux"]},
+  {id:"championship",name:"Championship",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",teams:["Leeds","Leicester","Southampton","Ipswich","Norwich","Watford","West Brom","Middlesbrough","Sunderland","Bristol City","Swansea","QPR","Stoke City","Hull City","Millwall","Preston","Cardiff","Coventry","Plymouth","Blackburn"]},
+  {id:"serieb",name:"Serie B",flag:"🇮🇹",teams:["Parme","Côme","Venezia","Cremonese","Catanzaro","Modène","Bari","Palermo","Sampdoria","Ternana","Ascoli","Feralpisalò","Lecco","Cittadella","Pise","Spezia","Brescia","Cosenza","Reggiana","Südtirol"]},
+  {id:"segunda",name:"Segunda División",flag:"🇪🇸",teams:["Valladolid","Leganés","Castellón","Elche","Racing Santander","Oviedo","Albacete","Mirandés","Burgos","Eldense","Zaragoza","Almería","Huesca","Tenerife","Granada","Sporting Gijón","Levante","Eibar","Cartagena","Ferrol"]},
+  {id:"mls",name:"MLS",flag:"🇺🇸",teams:["Inter Miami","LA Galaxy","LAFC","Seattle Sounders","Portland Timbers","Atlanta United","New York City FC","New York Red Bulls","Columbus Crew","Nashville SC","Philadelphia Union","Orlando City","Chicago Fire","FC Dallas","Austin FC","Real Salt Lake","Colorado Rapids","Vancouver Whitecaps","Toronto FC","CF Montréal"]},
+  {id:"ligamx",name:"Liga MX",flag:"🇲🇽",teams:["Club América","Chivas Guadalajara","Cruz Azul","Tigres UANL","Rayados Monterrey","Pumas UNAM","Santos Laguna","Toluca","Atlas","León","Necaxa","Pachuca","San Luis","Querétaro","Mazatlán","FC Juárez","Tijuana","Puebla"]},
+  {id:"superlig",name:"Süper Lig",flag:"🇹🇷",teams:["Galatasaray","Fenerbahçe","Beşiktaş","Trabzonspor","Başakşehir","Adana Demirspor","Sivasspor","Konyaspor","Antalyaspor","Kayserispor","Gaziantep","Hatayspor","Kasımpaşa","Ankaragücü","Alanyaspor","Pendikspor","Rizespor","Fatih Karagümrük","Samsunspor","İstanbulspor"]},
+  {id:"proleague",name:"Pro League Belge",flag:"🇧🇪",teams:["Club Bruges","Anderlecht","Union Saint-Gilloise","Gand","Genk","Standard Liège","Charleroi","Antwerp","Cercle Bruges","OHL","Westerlo","Kortrijk","Eupen","RWDM","Malines","Saint-Trond"]},
+  {id:"scots",name:"Scottish Premiership",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",teams:["Celtic","Rangers","Hearts","Hibernian","Aberdeen","Motherwell","Livingston","Dundee United","Ross County","St Mirren","Kilmarnock","St Johnstone"]},
+
+  // ── AMÉRIQUE DU SUD ──
+  {id:"brasileirao",name:"Brasileirão",flag:"🇧🇷",teams:["Flamengo","Palmeiras","Atletico Mineiro","Fluminense","São Paulo","Corinthians","Internacional","Grêmio","Santos","Botafogo","Vasco da Gama","Cruzeiro","Bahia","Fortaleza","Bragantino","Cuiabá","Athletico Paranaense","Goiás","América MG","Coritiba"]},
+  {id:"primera_arg",name:"Liga Argentina",flag:"🇦🇷",teams:["River Plate","Boca Juniors","Racing Club","Independiente","San Lorenzo","Huracán","Vélez Sársfield","Estudiantes","Lanús","Banfield","Talleres","Belgrano","Colón","Newell's Old Boys","Rosario Central","Defensa y Justicia","Gimnasia","Tigre","Godoy Cruz","Platense"]},
+  {id:"primera_col",name:"Liga Colombiana",flag:"🇨🇴",teams:["Atlético Nacional","Millonarios","América de Cali","Deportivo Cali","Santa Fe","Junior","Deportivo Pasto","Medellín","Peñarol","Once Caldas","Envigado","Alianza Petrolera","La Equidad","Patriotas","Bucaramanga","Jaguares","Fortaleza","Quindío"]},
+  {id:"primera_chi",name:"Primera División Chili",flag:"🇨🇱",teams:["Colo-Colo","Universidad de Chile","Universidad Católica","Everton","Huachipato","Palestino","O'Higgins","Unión Española","Audax Italiano","Cobresal","Ñublense","Magallanes","Antofagasta","Deportes Iquique","La Serena","Curicó"]},
+  {id:"liga_peru",name:"Liga 1 Pérou",flag:"🇵🇪",teams:["Alianza Lima","Universitario","Sporting Cristal","Municipal","Cienciano","Melgar","Binacional","Sport Huancayo","Cusco FC","UTC","Mannucci","Ayacucho FC","Carlos Stein","Atlético Grau","ADT","Deportivo Llacuabamba"]},
+  {id:"conmebol_lib",name:"Copa Libertadores",flag:"🏆",teams:["Flamengo","Palmeiras","River Plate","Boca Juniors","Atlético Mineiro","Fluminense","Racing Club","Peñarol","Nacional Uruguay","LDU Quito","Independiente del Valle","Olimpia","Cerro Porteño","Estudiantes","São Paulo","Colo-Colo","Atlético Nacional","Junior","Bolívar","The Strongest"]},
+
+  // ── ASIE ──
+  {id:"csl",name:"Chinese Super League",flag:"🇨🇳",teams:["Shanghai Port","Shandong Taishan","Beijing Guoan","Guangzhou FC","Shanghai Shenhua","Wuhan Three Towns","Henan Songshan Longmen","Changchun Yatai","Tianjin Jinmen Tiger","Dalian Pro","Qingdao Hainiu","Meizhou Hakka","Shenzhen FC","Chengdu Rongcheng","Nantong Zhiyun","Cangzhou Mighty Lions","Zhejiang FC","Nanjing City"]},
+  {id:"j_league",name:"J-League",flag:"🇯🇵",teams:["Vissel Kobe","Yokohama F. Marinos","Urawa Red Diamonds","Gamba Osaka","Cerezo Osaka","Kashima Antlers","Kawasaki Frontale","FC Tokyo","Nagoya Grampus","Sagan Tosu","Sanfrecce Hiroshima","Shimizu S-Pulse","Consadole Sapporo","Júbilo Iwata","Avispa Fukuoka","Kyoto Sanga","Albirex Niigata","Shonan Bellmare"]},
+  {id:"k_league",name:"K-League",flag:"🇰🇷",teams:["Jeonbuk Motors","Ulsan Hyundai","Suwon Samsung","FC Seoul","Pohang Steelers","Incheon United","Daegu FC","Gangwon FC","Jeju United","Seongnam FC","Gyeongnam FC","Daejeon Citizen","Gwangju FC","Busan IPark","Anyang FC","Cheongju FC"]},
+  {id:"saudi_pl",name:"Saudi Pro League",flag:"🇸🇦",teams:["Al-Hilal","Al-Nassr","Al-Ittihad","Al-Ahli","Al-Qadsiah","Al-Shabab","Al-Fayha","Al-Taawoun","Al-Ettifaq","Al-Wehda","Al-Fateh","Al-Khaleej","Damac FC","Al-Hazm","Al-Riyadh","Al-Okhdood"]},
+  {id:"uae_league",name:"UAE Pro League",flag:"🇦🇪",teams:["Al-Ain","Al-Jazira","Al-Wahda","Sharjah FC","Al-Nasr","Baniyas","Al-Wasl","Shabab Al-Ahli","Emirates Club","Fujairah FC","Ittihad Kalba","Al-Dhafra"]},
+  {id:"acl",name:"AFC Champions League",flag:"🌏",teams:["Al-Hilal","Al-Nassr","Jeonbuk Motors","Ulsan Hyundai","Yokohama F. Marinos","Urawa Red Diamonds","Shanghai Port","Shandong Taishan","Vissel Kobe","Kashima Antlers","Al-Ittihad","Al-Ahli","Nasaf","Esteghlal","Persepolis","Pakhtakor"]},
+
+  // ── AFRIQUE ──
+  {id:"afcon",name:"CAN / Éliminatoires",flag:"🌍",teams:["Maroc","Sénégal","Nigeria","Côte d'Ivoire","Ghana","Cameroun","Égypte","Algérie","Tunisie","Mali","Burkina Faso","Guinée","Congo DR","Afrique du Sud","Zambie","Zimbabwe","Mozambique","Angola","Cap-Vert","Mauritanie"]},
+  {id:"botola",name:"Botola Pro (Maroc)",flag:"🇲🇦",teams:["Wydad Casablanca","Raja Casablanca","FUS Rabat","FAR Rabat","RS Berkane","Moghreb Tétouan","Hassania Agadir","Olympic Safi","Difaâ Hassani El Jadidi","Chabab Mohammedia","Ittihad Tanger","Rapide Oued Zem","AS FAR","Youssoufia Berrechid"]},
+  {id:"ligue_alg",name:"Ligue Pro (Algérie)",flag:"🇩🇿",teams:["MC Alger","USM Alger","CR Belouizdad","ES Sétif","JS Kabylie","MC Oran","ASM Oran","NA Hussein Dey","CS Constantine","ES Ben Aknoun","Paradou AC","Olympique Médéa","ASO Chlef","RC Arbaâ"]},
+
+  // ── EUROPE (AUTRES) ──
+  {id:"ekstraklasa",name:"Ekstraklasa (Pologne)",flag:"🇵🇱",teams:["Legia Varsovie","Lech Poznań","Raków Częstochowa","Wisła Cracovie","Zagłębie Lubin","Cracovia","Pogoń Szczecin","Jagiellonia Białystok","Piast Gliwice","Górnik Zabrze","Śląsk Wrocław","Widzew Łódź","Warta Poznań","Ruch Chorzów","Zagłębie Sosnowiec","Korona Kielce"]},
+  {id:"super_lig_gr",name:"Super League (Grèce)",flag:"🇬🇷",teams:["Olympiakos","PAOK","AEK Athènes","Panathinaikos","Aris Thessalonique","Atromitos","Ionikos","Panetolikos","Volos","Asteras Tripolis","PAS Giannina","Lamia","OFI Crète","Levadiakos"]},
+  {id:"primera_rum",name:"Liga I (Roumanie)",flag:"🇷🇴",teams:["FCSB","CFR Cluj","Universitatea Craiova","Rapid Bucarest","Farul Constanța","Sepsi OSK","Petrolul Ploiești","Dinamo Bucarest","Hermannstadt","FC Voluntari","Poli Iași","UTA Arad","FC Argeș","FC Botoșani"]},
+  {id:"allsvenskan",name:"Allsvenskan (Suède)",flag:"🇸🇪",teams:["Malmö FF","Djurgårdens IF","IFK Göteborg","Hammarby","IF Elfsborg","Häcken","AIK","IFK Norrköping","Kalmar FF","Mjällby","IF Sirius","Halmstads BK","Degerfors IF","GIF Sundsvall","Värnamo","Örebro SK"]},
+  {id:"tippeligaen",name:"Eliteserien (Norvège)",flag:"🇳🇴",teams:["Bodø/Glimt","Molde","Rosenborg","Brann","Viking","Strømsgodset","Vålerenga","Lillestrøm","Sandefjord","Tromsø","Stabæk","HamKam","Odds BK","Haugesund","Aalesund","Sarpsborg 08"]},
+  {id:"veikkausliiga",name:"Veikkausliiga (Finlande)",flag:"🇫🇮",teams:["HJK Helsinki","HIFK","SJK Seinäjoki","Ilves Tampere","KuPS Kuopio","Mariehamn","Inter Turku","VPS Vaasa","FC Haka","IFK Mariehamn","FC Lahti","TPS Turku"]},
+
+  // ── MATCHS AMICAUX & SÉLECTIONS ──
+  {id:"friendly_clubs",name:"Matchs Amicaux (Clubs)",flag:"🤝",teams:["Real Madrid","Barcelona","Man City","Arsenal","Liverpool","PSG","Bayern Munich","Inter Milan","Juventus","Dortmund","Ajax","Benfica","Porto","Sporting CP","Marseille","Lyon","Monaco","Atlético Madrid","Séville","Napoli","Roma","Lazio","Fiorentina","Galatasaray","Fenerbahçe","Celtic","Rangers","Club Bruges","Anderlecht","PSV Eindhoven","Feyenoord","Flamengo","Palmeiras","River Plate","Boca Juniors","Al-Hilal","Al-Nassr","Al-Ittihad","Inter Miami","LA Galaxy","Seattle Sounders","Club América","Chivas Guadalajara"]},
+  {id:"friendly_nations",name:"Matchs Amicaux (Nations)",flag:"🌐",teams:["France","Brésil","Argentine","Angleterre","Espagne","Allemagne","Portugal","Italie","Pays-Bas","Belgique","Croatie","Uruguay","Colombie","Mexique","États-Unis","Maroc","Sénégal","Nigeria","Côte d'Ivoire","Ghana","Cameroun","Égypte","Algérie","Tunisie","Japon","Corée du Sud","Australie","Iran","Arabie Saoudite","Qatar","Danemark","Suisse","Autriche","Suède","Norvège","Pologne","Ukraine","Turquie","Grèce","Roumanie","Écosse","Irlande","Pays de Galles","Slovénie","Slovaquie","République Tchèque","Serbie","Hongrie"]},
+  {id:"euro_qual",name:"Éliminatoires Euro 2028",flag:"🇪🇺",teams:["France","Espagne","Allemagne","Angleterre","Portugal","Italie","Pays-Bas","Belgique","Croatie","Danemark","Suisse","Autriche","Suède","Norvège","Pologne","Ukraine","Turquie","Écosse","Irlande","Pays de Galles","Serbie","Hongrie","République Tchèque","Slovaquie","Slovénie","Grèce","Roumanie","Bulgarie","Albanie","Islande","Finlande","Bosnie","Monténégro","Kosovo","Macédoine du Nord","Azerbaïdjan","Arménie","Géorgie","Chypre","Malte","Luxembourg","Liechtenstein","Andorre","Saint-Marin","Îles Féroé","Gibraltar"]},
+  {id:"wc_qual_am",name:"Qualifs Coupe du Monde (Amériques)",flag:"🌎",teams:["Argentine","Brésil","Uruguay","Colombie","Équateur","Chili","Pérou","Paraguay","Venezuela","Bolivie","Panama","Honduras","Mexique","États-Unis","Canada","Costa Rica","El Salvador","Guatemala","Jamaïque","Haïti","Trinidad et Tobago","Curaçao"]},
+  {id:"wc_qual_af",name:"Qualifs Coupe du Monde (Afrique)",flag:"🌍",teams:["Maroc","Sénégal","Nigeria","Côte d'Ivoire","Égypte","Algérie","Tunisie","Cameroun","Ghana","Mali","Burkina Faso","Guinée","Congo DR","Afrique du Sud","Zambie","Zimbabwe","Angola","Mozambique","Cap-Vert","Mauritanie","Gabon","Bénin","Gambie","Guinée-Bissau","Tanzanie","Ouganda","Kenya","Éthiopie"]},
+  {id:"copa_america",name:"Copa América",flag:"🏅",teams:["Argentine","Brésil","Uruguay","Colombie","Équateur","Chili","Pérou","Paraguay","Venezuela","Bolivie","Panama","Jamaïque","États-Unis","Canada","Mexique","Costa Rica"]},
+  {id:"gold_cup",name:"Gold Cup (CONCACAF)",flag:"🥇",teams:["États-Unis","Mexique","Canada","Honduras","Costa Rica","Panama","El Salvador","Guatemala","Jamaïque","Haïti","Trinidad et Tobago","Curaçao","Guadeloupe","Martinique","Suriname","Bermudes"]}
+];
+
+// Données de force par équipe (rating 1-100)
+const TEAM_RATINGS = {
+  "PSG":88,"Marseille":76,"Lyon":74,"Monaco":79,"Lille":75,"Nice":73,"Lens":72,"Rennes":71,"Nantes":65,"Toulouse":64,
+  "Strasbourg":63,"Montpellier":62,"Reims":66,"Brest":70,"Le Havre":60,"Metz":58,"Clermont":57,"Lorient":59,"Auxerre":61,"Saint-Étienne":60,
+  "Arsenal":87,"Man City":92,"Liverpool":89,"Chelsea":82,"Man United":80,"Tottenham":79,"Newcastle":81,"Aston Villa":82,
+  "West Ham":76,"Brighton":77,"Brentford":74,"Fulham":73,"Crystal Palace":70,"Wolves":69,"Everton":67,"Nottingham Forest":71,
+  "Bournemouth":69,"Burnley":60,"Sheffield United":58,"Luton":56,
+  "Real Madrid":95,"Barcelona":90,"Atlético Madrid":86,"Sevilla":76,"Real Betis":77,"Valencia":70,"Villarreal":78,
+  "Athletic Bilbao":77,"Real Sociedad":78,"Osasuna":69,"Getafe":67,"Girona":75,"Las Palmas":66,"Rayo Vallecano":68,
+  "Celta Vigo":69,"Alavés":63,"Mallorca":67,"Valladolid":62,"Leganés":64,"Espanyol":65,
+  "Bayern Munich":93,"Dortmund":85,"Leipzig":84,"Bayer Leverkusen":88,"Francfort":79,"Wolfsburg":74,"Stuttgart":80,
+  "Freiburg":76,"Hoffenheim":73,"Union Berlin":71,"Werder Brême":72,"Mainz":70,"Augsburg":69,"Heidenheim":67,
+  "Darmstadt":58,"Cologne":66,"Bochum":65,"Mönchengladbach":72,"Holstein Kiel":64,"St. Pauli":66,
+  "Inter Milan":91,"AC Milan":87,"Juventus":85,"Napoli":84,"Roma":83,"Lazio":80,"Atalanta":84,"Fiorentina":78,
+  "Torino":72,"Bologne":77,"Monza":69,"Sassuolo":65,"Cagliari":64,"Frosinone":62,"Gênes":66,"Udinese":65,
+  "Lecce":63,"Vérone":62,"Empoli":64,"Salernitana":60,
+  "Ajax":80,"PSV Eindhoven":82,"Feyenoord":81,"AZ Alkmaar":76,"Utrecht":70,"Twente":72,"Vitesse":65,
+  "Groningue":62,"Heerenveen":63,"NEC Nimègue":64,"Almere City":61,"Sparta Rotterdam":63,"RKC Waalwijk":60,
+  "Fortuna Sittard":59,"PEC Zwolle":60,"Heracles":62,"Go Ahead Eagles":61,"Excelsior":60,
+  "Benfica":85,"Porto":84,"Sporting CP":83,"Braga":77,"Vitória SC":68,"Gil Vicente":63,"Casa Pia":64,
+  "Arouca":62,"Moreirense":63,"Famalicão":62,"Chaves":60,"Vizela":61,"Boavista":65,"Rio Ave":63,
+  "Estrela da Amadora":60,"Farense":60,"Portimonense":61,"Estoril":62,
+  "Celtic":82,"Rangers":80,"Hearts":68,"Hibernian":67,"Aberdeen":66,"Motherwell":63,
+  "Livingston":62,"Dundee United":61,"Ross County":60,"St Mirren":62,"Kilmarnock":63,"St Johnstone":61,
+  "Galatasaray":82,"Fenerbahçe":81,"Beşiktaş":78,"Trabzonspor":75,"Başakşehir":72,
+  "Club Bruges":80,"Anderlecht":78,"Union Saint-Gilloise":76,"Gand":74,"Genk":73,
+  "Inter Miami":74,"LA Galaxy":71,"LAFC":73,"Seattle Sounders":70,"Portland Timbers":69,
+  "Club América":80,"Chivas Guadalajara":76,"Cruz Azul":74,"Tigres UANL":79,"Rayados Monterrey":78,
+  // Brésil
+  "Flamengo":85,"Palmeiras":84,"Atletico Mineiro":82,"Fluminense":80,"São Paulo":76,"Corinthians":75,
+  "Internacional":74,"Grêmio":73,"Santos":70,"Botafogo":78,"Vasco da Gama":69,"Cruzeiro":71,
+  "Bahia":68,"Fortaleza":70,"Bragantino":72,"Athletico Paranaense":71,"Coritiba":62,"Goiás":63,
+  // Argentine
+  "River Plate":86,"Boca Juniors":84,"Racing Club":78,"Independiente":72,"San Lorenzo":71,
+  "Huracán":66,"Vélez Sársfield":70,"Estudiantes":72,"Lanús":69,"Banfield":66,
+  "Talleres":73,"Belgrano":67,"Rosario Central":70,"Defensa y Justicia":68,
+  // Colombie / Chili / Pérou
+  "Atlético Nacional":78,"Millonarios":75,"América de Cali":72,"Deportivo Cali":70,"Junior":73,
+  "Colo-Colo":76,"Universidad de Chile":73,"Universidad Católica":74,
+  "Alianza Lima":72,"Universitario":70,"Sporting Cristal":69,
+  // Copa Libertadores extras
+  "LDU Quito":70,"Independiente del Valle":72,"Olimpia":68,"Cerro Porteño":69,
+  "Nacional Uruguay":71,"Peñarol":74,"Bolívar":67,"The Strongest":64,
+  // Chine
+  "Shanghai Port":74,"Shandong Taishan":72,"Beijing Guoan":71,"Guangzhou FC":68,
+  "Shanghai Shenhua":70,"Wuhan Three Towns":69,"Henan Songshan Longmen":65,
+  "Changchun Yatai":64,"Tianjin Jinmen Tiger":63,"Dalian Pro":62,"Chengdu Rongcheng":65,
+  "Zhejiang FC":66,"Nantong Zhiyun":61,"Nanjing City":60,"Cangzhou Mighty Lions":60,
+  // Japon
+  "Vissel Kobe":76,"Yokohama F. Marinos":78,"Urawa Red Diamonds":75,"Gamba Osaka":72,
+  "Cerezo Osaka":70,"Kashima Antlers":74,"Kawasaki Frontale":77,"FC Tokyo":71,
+  "Nagoya Grampus":69,"Sanfrecce Hiroshima":70,"Shimizu S-Pulse":65,"Consadole Sapporo":64,
+  "Júbilo Iwata":63,"Avispa Fukuoka":65,"Kyoto Sanga":64,"Albirex Niigata":63,
+  "Shonan Bellmare":62,"Hammarby":72,"Malmö FF":78,"Djurgårdens IF":73,"IFK Göteborg":70,
+  // Corée
+  "Jeonbuk Motors":76,"Ulsan Hyundai":78,"Suwon Samsung":70,"FC Seoul":72,
+  "Pohang Steelers":71,"Incheon United":66,"Daegu FC":65,"Gangwon FC":64,
+  // Arabie Saoudite
+  "Al-Hilal":88,"Al-Nassr":86,"Al-Ittihad":82,"Al-Ahli":80,"Al-Qadsiah":72,
+  "Al-Shabab":70,"Al-Fayha":65,"Al-Taawoun":66,"Al-Ettifaq":74,"Al-Wehda":68,
+  // Sélections nationales
+  "France":92,"Brésil":91,"Argentine":93,"Angleterre":88,"Espagne":90,"Allemagne":87,
+  "Portugal":89,"Italie":86,"Pays-Bas":85,"Belgique":84,"Croatie":83,"Uruguay":82,
+  "Colombie":80,"Mexique":78,"États-Unis":76,"Canada":74,"Maroc":82,"Sénégal":80,
+  "Nigeria":78,"Côte d'Ivoire":79,"Ghana":74,"Cameroun":73,"Égypte":75,"Algérie":76,
+  "Tunisie":73,"Mali":72,"Burkina Faso":70,"Guinée":69,"Congo DR":71,"Afrique du Sud":68,
+  "Zambie":65,"Zimbabwe":62,"Angola":64,"Cap-Vert":68,"Mauritanie":63,"Gabon":65,
+  "Japon":80,"Corée du Sud":79,"Australie":72,"Iran":74,"Arabie Saoudite":71,"Qatar":66,
+  "Danemark":82,"Suisse":80,"Autriche":77,"Suède":75,"Norvège":74,"Pologne":76,
+  "Ukraine":78,"Turquie":75,"Grèce":70,"Roumanie":68,"Écosse":72,"Irlande":68,
+  "Pays de Galles":70,"Slovénie":69,"Slovaquie":68,"République Tchèque":74,"Serbie":76,
+  "Hongrie":71,"Albanie":65,"Islande":67,"Finlande":66,"Bosnie":67,"Monténégro":64,
+  "Kosovo":63,"Macédoine du Nord":64,"Azerbaïdjan":60,"Arménie":61,"Géorgie":66,
+  "Panama":68,"Honduras":65,"Costa Rica":67,"El Salvador":63,"Guatemala":61,
+  "Jamaïque":66,"Haïti":60,"Trinidad et Tobago":63,"Curaçao":62,"Équateur":76,
+  "Chili":74,"Pérou":70,"Paraguay":68,"Venezuela":65,"Bolivie":60,
+  // Afrique du Nord
+  "Wydad Casablanca":75,"Raja Casablanca":74,"MC Alger":72,"USM Alger":71,
+  "CR Belouizdad":73,"ES Sétif":70,"JS Kabylie":68,
+  // Europe de l'Est
+  "Legia Varsovie":72,"Lech Poznań":71,"Raków Częstochowa":70,"Olympiakos":74,
+  "PAOK":72,"AEK Athènes":71,"Panathinaikos":70,"FCSB":69,"CFR Cluj":70,
+  "Universitatea Craiova":68,"Rapid Bucarest":67,"Bodø/Glimt":76,"Molde":73,"Rosenborg":71,
+};
+
+// Joueurs clés par équipe
+const KEY_PLAYERS = {
+  "PSG":["Mbappé (ATT)","Dembélé (ATT)","Vitinha (MIL)"],
+  "Marseille":["Aubameyang (ATT)","Veretout (MIL)","Clauss (DEF)"],
+  "Real Madrid":["Vinicius Jr (ATT)","Bellingham (MIL)","Modric (MIL)"],
+  "Barcelona":["Lewandowski (ATT)","Pedri (MIL)","Yamal (ATT)"],
+  "Man City":["Haaland (ATT)","De Bruyne (MIL)","Rodri (MIL)"],
+  "Arsenal":["Saka (ATT)","Ødegaard (MIL)","Rice (MIL)"],
+  "Liverpool":["Salah (ATT)","Núñez (ATT)","Mac Allister (MIL)"],
+  "Bayern Munich":["Kane (ATT)","Musiala (MIL)","Kimmich (MIL)"],
+  "Inter Milan":["Lautaro (ATT)","Thuram (ATT)","Barella (MIL)"],
+  "Dortmund":["Sancho (ATT)","Brandt (MIL)","Hummels (DEF)"],
+  "Atlético Madrid":["Griezmann (ATT)","Morata (ATT)","Koke (MIL)"],
+  "Napoli":["Osimhen (ATT)","Kvaratskhelia (ATT)","Di Lorenzo (DEF)"],
+};
+
+// Blessés typiques (simulés de manière réaliste)
+const INJURY_POOL = {
+  "PSG":["Ramos (DEF - genou)","Nuno Mendes (DEF - cuisse)"],
+  "Real Madrid":["Militão (DEF - ligaments)","Carvajal (DEF - cheville)"],
+  "Barcelona":["Ter Stegen (GK - genou)","Gavi (MIL - ligaments)"],
+  "Man City":["Doku (ATT - cheville)","Walker (DEF - cuisse)"],
+  "Arsenal":["Tomiyasu (DEF - genou)","Tierney (DEF - cuisse)"],
+  "Liverpool":["Alisson (GK - épaule)","Jota (ATT - cuisse)"],
+  "Bayern Munich":["Neuer (GK - genou)","Goretzka (MIL - genou)"],
+  "Juventus":["Chiesa (ATT - ligaments)","Pogba (MIL - suspension)"],
+  "Marseille":["Kondogbia (MIL - cuisse)","Gigot (DEF - côte)"],
+};
+
+// ── BUTEURS & JOUEURS DÉCISIFS ──────────────────────────────────────────────
+const SCORERS = {
+  "PSG":["Mbappé (9 buts)","Dembélé (7 buts)","Asensio (4 buts)"],
+  "Marseille":["Aubameyang (11 buts)","Harit (5 buts)","Luis Henrique (4 buts)"],
+  "Lyon":["Lacazette (8 buts)","Cherki (6 buts)","Nuamah (4 buts)"],
+  "Monaco":["Ben Yedder (10 buts)","Minamino (6 buts)","Golovin (5 buts)"],
+  "Lille":["David (14 buts)","Zhegrova (6 buts)","Cabella (4 buts)"],
+  "Nice":["Boga (5 buts)","Bouanani (4 buts)","Thuram (3 buts)"],
+  "Lens":["Frankowski (6 buts)","Sotoca (5 buts)","Said (4 buts)"],
+  "Rennes":["Terrier (7 buts)","Kalimuendo (6 buts)","Bourigeaud (5 buts)"],
+  "Real Madrid":["Vinicius Jr (18 buts)","Bellingham (14 buts)","Rodrygo (9 buts)"],
+  "Barcelona":["Lewandowski (19 buts)","Yamal (8 buts)","Ferran Torres (7 buts)"],
+  "Man City":["Haaland (24 buts)","Foden (10 buts)","De Bruyne (8 buts)"],
+  "Arsenal":["Saka (12 buts)","Havertz (9 buts)","Martinelli (8 buts)"],
+  "Liverpool":["Salah (20 buts)","Núñez (12 buts)","Diaz (8 buts)"],
+  "Bayern Munich":["Kane (22 buts)","Musiala (10 buts)","Sané (8 buts)"],
+  "Inter Milan":["Lautaro (18 buts)","Thuram (12 buts)","Calhanoglu (8 buts)"],
+  "Dortmund":["Füllkrug (10 buts)","Brandt (7 buts)","Sancho (6 buts)"],
+  "Atlético Madrid":["Griezmann (11 buts)","Morata (9 buts)","Correa (5 buts)"],
+  "Napoli":["Osimhen (15 buts)","Kvaratskhelia (10 buts)","Politano (7 buts)"],
+  "Juventus":["Vlahovic (13 buts)","Chiesa (8 buts)","Yildiz (6 buts)"],
+  "AC Milan":["Giroud (10 buts)","Leao (9 buts)","Pulisic (8 buts)"],
+  "Roma":["Lukaku (12 buts)","Dybala (9 buts)","El Shaarawy (6 buts)"],
+  "Galatasaray":["Icardi (14 buts)","Mertens (8 buts)","Zaha (6 buts)"],
+  "Fenerbahçe":["Dzeko (10 buts)","Tadic (7 buts)","Batshuayi (6 buts)"],
+  "Celtic":["Kyogo (16 buts)","Maeda (9 buts)","Bernardo (7 buts)"],
+  "Rangers":["Dessers (11 buts)","Tavernier (8 buts - pen)","Wright (6 buts)"],
+  "PSV Eindhoven":["De Jong (15 buts)","Tillman (8 buts)","Veerman (7 buts)"],
+  "Benfica":["Rafa (9 buts)","Gonçalo Ramos (8 buts)","Di Maria (6 buts)"],
+  "Porto":["Evanilson (12 buts)","Galeno (8 buts)","Pepê (6 buts)"],
+  "Sporting CP":["Gyökeres (22 buts)","Trincão (9 buts)","Nuno Santos (6 buts)"],
+  // Brésil
+  "Flamengo":["Pedro (15 buts)","Gabigol (12 buts)","Arrascaeta (9 buts)"],
+  "Palmeiras":["Endrick (10 buts)","Rony (8 buts)","Dudu (7 buts)"],
+  "Atletico Mineiro":["Hulk (12 buts)","Eduardo Sasha (9 buts)","Nacho Fernández (6 buts)"],
+  "Fluminense":["Germán Cano (14 buts)","Arias (8 buts)","Ganso (5 buts)"],
+  // Argentine
+  "River Plate":["Borré (12 buts)","Solari (9 buts)","De la Cruz (7 buts)"],
+  "Boca Juniors":["Cavani (10 buts)","Merentiel (8 buts)","Pol Fernández (5 buts)"],
+  "Racing Club":["Copetti (9 buts)","Zárate (7 buts)","Di Cesare (5 buts)"],
+  // Sélections
+  "France":["Mbappé (ATT)","Giroud (ATT)","Dembélé (ATT)"],
+  "Brésil":["Vinicius Jr (ATT)","Rodrygo (ATT)","Endrick (ATT)"],
+  "Argentine":["Messi (ATT)","Lautaro (ATT)","Di María (ATT)"],
+  "Angleterre":["Kane (ATT)","Bellingham (MIL)","Saka (ATT)"],
+  "Espagne":["Morata (ATT)","Yamal (ATT)","Olmo (MIL)"],
+  "Allemagne":["Havertz (ATT)","Gnabry (ATT)","Müller (ATT)"],
+  "Portugal":["Ronaldo (ATT)","Leao (ATT)","Bruno Fernandes (MIL)"],
+  "Italie":["Immobile (ATT)","Chiesa (ATT)","Barella (MIL)"],
+  "Maroc":["En-Nesyri (ATT)","Ziyech (MIL)","Boufal (ATT)"],
+  "Sénégal":["Mané (ATT)","Dia (ATT)","Diatta (ATT)"],
+  "Nigeria":["Osimhen (ATT)","Lookman (ATT)","Chukwueze (ATT)"],
+  // Chine
+  "Shanghai Port":["Hulk (ATT)","Wu Lei (ATT)","Fernandinho (MIL)"],
+  "Shandong Taishan":["Fellaini (MIL)","Graziano Pellè (ATT)","Liu Yang (ATT)"],
+  // Arabie Saoudite
+  "Al-Hilal":["Neymar (ATT)","Mitrović (ATT)","Malcom (ATT)"],
+  "Al-Nassr":["Ronaldo (ATT)","Mané (ATT)","Talisca (ATT)"],
+  "Al-Ittihad":["Benzema (ATT)","Kanté (MIL)","Fabinho (MIL)"],
+  "Al-Ahli":["Mahrez (ATT)","Firmino (ATT)","Gabri Veiga (MIL)"],
+};
+
+const PENALTY_TAKERS = {
+  "PSG":"Mbappé","Real Madrid":"Benzema / Modric","Barcelona":"Lewandowski",
+  "Man City":"Haaland","Arsenal":"Saka","Liverpool":"Salah","Bayern Munich":"Kane",
+  "Inter Milan":"Calhanoglu","Juventus":"Vlahovic","Napoli":"Osimhen",
+  "Marseille":"Aubameyang","Lille":"David","Monaco":"Ben Yedder",
+  "Atlético Madrid":"Griezmann","Dortmund":"Haaland","Roma":"Dybala",
+  "Rangers":"Tavernier","Celtic":"Kyogo","Sporting CP":"Gyökeres",
+  "Fenerbahçe":"Dzeko","Galatasaray":"Icardi",
+};
+
+// Formations communes par équipe
+const FORMATIONS = {
+  "PSG":"4-3-3","Real Madrid":"4-3-3","Barcelona":"4-3-3","Man City":"4-3-3",
+  "Arsenal":"4-3-3","Liverpool":"4-3-3","Bayern Munich":"4-2-3-1","Inter Milan":"3-5-2",
+  "Juventus":"4-3-3","Napoli":"4-3-3","Atlético Madrid":"4-4-2","Dortmund":"4-2-3-1",
+  "Roma":"3-4-2-1","AC Milan":"4-2-3-1","Marseille":"4-3-3","Lyon":"4-3-3",
+  "Monaco":"4-2-3-1","Lille":"4-4-2","PSV Eindhoven":"4-3-3","Celtic":"4-3-3",
+  "Rangers":"4-3-3","Sporting CP":"4-3-3","Benfica":"4-4-2","Porto":"4-4-2",
+};
+
+function getScorers(team) {
+  if (SCORERS[team]) return SCORERS[team];
+  return [`${team} n°9 (attaquant principal)`, `${team} n°10 (meneur de jeu)`];
+}
+
+function getPenaltyRisk(home, away, liveData) {
+  // Calcul du risque de penalty basé sur le style de jeu
+  const aggressiveTeams = ["Atlético Madrid","Chelsea","Tottenham","Burnley","Lens","Nice","Galatasaray"];
+  const penaltyMagnetTeams = ["Man City","Barcelona","Real Madrid","Liverpool","PSG","Inter Milan"];
+  
+  let risk = 30; // base 30%
+  if (aggressiveTeams.includes(home) || aggressiveTeams.includes(away)) risk += 20;
+  if (penaltyMagnetTeams.includes(home) || penaltyMagnetTeams.includes(away)) risk += 15;
+  if (liveData?.homeForm) {
+    const totalWins = (liveData.homeForm.filter(x=>x==="W").length + liveData.awayForm?.filter(x=>x==="W").length || 0);
+    risk += totalWins * 2;
+  }
+  risk = Math.min(85, Math.max(20, risk + rnd(-10, 10)));
+  
+  const htaker = PENALTY_TAKERS[home] || `Tireur attitré de ${home}`;
+  const ataker = PENALTY_TAKERS[away] || `Tireur attitré de ${away}`;
+  
+  return {
+    probabilite: risk,
+    niveau: risk >= 65 ? "ÉLEVÉ" : risk >= 45 ? "MOYEN" : "FAIBLE",
+    couleur: risk >= 65 ? "#ff4081" : risk >= 45 ? "#ffb300" : "#00e676",
+    tireurHome: htaker,
+    tireurAway: ataker,
+  };
+}
+
+async function getLineups(homeId, awayId) {
+  try {
+    // Cherche les compositions officielles (disponibles ~1h avant le match)
+    const [hLineup, aLineup] = await Promise.all([
+      fetchAPI(`/football-get-team-squad?teamId=${homeId}`).catch(()=>null),
+      fetchAPI(`/football-get-team-squad?teamId=${awayId}`).catch(()=>null),
+    ]);
+    
+    const extractLineup = (data) => {
+      const players = data?.response?.players || [];
+      return players.slice(0, 11).map(p => `${p.name} (${p.position === 'Goalkeeper' ? 'GK' : p.position === 'Defender' ? 'DEF' : p.position === 'Midfielder' ? 'MIL' : 'ATT'})`);
+    };
+    
+    return {
+      home: extractLineup(hLineup),
+      away: extractLineup(aLineup),
+    };
+  } catch(e) {
+    return null;
+  }
+}
+
+function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function pick(arr,n){
+  const s=[...arr].sort(()=>Math.random()-.5);
+  return s.slice(0,n);
+}
+function getForm(team,seed){
+  // Légèrement biaisé selon la force de l'équipe
+  const r=getRating(team);
+  const pool=[];
+  const w=r>80?5:r>70?4:r>60?3:2;
+  const l=r>80?1:r>70?2:r>60?3:4;
+  for(let i=0;i<w;i++)pool.push("W");
+  for(let i=0;i<l;i++)pool.push("L");
+  for(let i=0;i<(7-w-l);i++)pool.push("D");
+  return pick(pool,5);
+}
+function getInjuries(team){
+  if(INJURY_POOL[team])return Math.random()>.4?pick(INJURY_POOL[team],rnd(0,INJURY_POOL[team].length)):[];
+  // Générer des absences génériques réalistes
+  const generics=[
+    team+" #"+rnd(1,30)+" (MIL - cuisse)",
+    "Défenseur central (blessure cheville)",
+    "Milieu récupérateur (suspension 1 match)"
+  ];
+  return Math.random()>.5?pick(generics,rnd(0,2)):[];
+}
+function getKeyPlayers(team){
+  if(KEY_PLAYERS[team])return KEY_PLAYERS[team];
+  return[team+" n°9 (ATT - en forme)",team+" n°10 (MIL - 3 passes déc.)"];
+}
+
+function buildProno(home, away, leagueName){
+  const rH = getRating(home);
+  const rA = getRating(away);
+  const diff=rH-rA;
+  // Avantage domicile +5
+  const adjH=rH+5;
+  const adjA=rA;
+
+  const neutralLeagueIds=["friendly_clubs","friendly_nations","euro_qual","wc_qual_am","wc_qual_af","copa_america","gold_cup","conmebol_lib","acl","cl","el"];
+  const isNeutralVenue = neutralLeagueIds.includes(currentLeague?.id);
+  const homeBonusDiff = isNeutralVenue ? diff : diff + 5; // Pas d'avantage domicile sur terrain neutre
+
+  // Probabilités brutes
+  let pH=35+homeBonusDiff*0.6, pN=28-Math.abs(diff)*0.2, pA=37-homeBonusDiff*0.6;
+  // Normalisation
+  const tot=pH+pN+pA;
+  pH=Math.round(pH/tot*100);
+  pA=Math.round(pA/tot*100);
+  pN=100-pH-pA;
+  if(pN<8){pN=8;const r2=pH+pA;pH=Math.round(pH/r2*92);pA=92-pH}
+
+  // Résultat
+  let resultat;
+  const r=Math.random()*100;
+  if(r<pH)resultat="Victoire domicile";
+  else if(r<pH+pN)resultat="Match nul";
+  else resultat="Victoire extérieur";
+
+  // Score
+  const avgGoals=2.3+((rH+rA)/2-70)*0.03;
+  const goalsH=resultat==="Victoire domicile"?rnd(2,4):resultat==="Match nul"?rnd(1,2):rnd(0,1);
+  const goalsA=resultat==="Victoire extérieur"?rnd(2,4):resultat==="Match nul"?goalsH:rnd(0,1);
+  const score=`${goalsH}-${goalsA}`;
+  const total=goalsH+goalsA;
+
+  // Confiance
+  const gap=Math.abs(diff);
+  const confiance=Math.min(92,Math.max(42,52+gap*0.8+rnd(-5,5)));
+
+  // Forme simulée selon le niveau de l'équipe
+  const formeH = getForm(home);
+  const formeA = getForm(away);
+  const winsH=formeH.filter(x=>x==="W").length;
+  const winsA=formeA.filter(x=>x==="W").length;
+
+  // Blessés
+  const blessesH=getInjuries(home);
+  const blessesA=getInjuries(away);
+
+  // Joueurs clés
+  const joueursH=getKeyPlayers(home);
+  const joueursA=getKeyPlayers(away);
+
+  // H2H simulé
+  const h2hResults=[];
+  for(let i=0;i<3;i++){const s1=rnd(0,3),s2=rnd(0,3);h2hResults.push(`${home} ${s1}-${s2} ${away}`);}
+  const h2hStr = "Confrontations récentes : "+h2hResults.join(" | ");
+
+  // Analyse
+  const forceHome=rH>80?"une des meilleures équipes de la compétition":rH>70?"une équipe solide":rH>60?"une formation correcte":"une équipe en difficulté";
+  const forceAway=rA>80?"une des meilleures équipes de la compétition":rA>70?"une équipe solide":rA>60?"une formation correcte":"une équipe en difficulté";
+  const formeHomeStr=winsH>=3?"excellente forme":"forme correcte";
+  const formeAwayStr=winsA>=3?"excellente forme":"forme variable";
+  const injuryNote=blessesH.length>0?` L'absence de ${blessesH[0].split(" (")[0]} pourrait peser.`:"";
+  const analyse=`${home} est ${forceHome} en ${leagueName} avec une ${formeHomeStr} récente (${winsH}/5 victoires). ${away} affiche ${forceAway} et une ${formeAwayStr} (${winsA}/5 victoires). L'avantage du terrain est significatif dans cette confrontation.${injuryNote} ${resultat==="Victoire domicile"?`${home} devrait s'imposer grâce à sa supériorité technique et son public.`:resultat==="Victoire extérieur"?`${away} a les moyens de créer la surprise malgré le déplacement.`:`Un match équilibré qui pourrait se terminer sur un score de parité.`}`;
+
+  const facteurs=[
+    `${home} ${winsH>=3?"en grande forme":"en forme correcte"} : ${winsH} victoires sur les 5 derniers matchs`,
+    `${away} ${winsA>=3?"performant":"régulier"} : ${winsA} succès récents · ${rA>80?"favori habituel":"outsider potentiel"}`,
+    diff>0?`Supériorité technique de ${home} (écart de niveau : +${gap} pts)`:`${away} légèrement supérieur en termes de qualité d'effectif`,
+    blessesH.length>0?`Absences importantes chez ${home} : ${blessesH.slice(0,2).map(x=>x.split(" (")[0]).join(", ")}`:blessesA.length>0?`${away} privé de ${blessesA[0].split(" (")[0]} pour ce match`:`Effectifs au complet des deux côtés`,
+  ];
+
+  // Buteurs potentiels
+  const buteursH = getScorers(home);
+  const buteursA = getScorers(away);
+
+  // Compositions
+  const lineupH = liveData?.lineupHome || null;
+  const lineupA = liveData?.lineupAway || null;
+  const formationH = FORMATIONS[home] || "4-3-3";
+  const formationA = FORMATIONS[away] || "4-3-3";
+
+  // Risque penalty
+  const penaltyRisk = getPenaltyRisk(home, away, null);
+
+  const neutralLeagues=["friendly_clubs","friendly_nations","euro_qual","wc_qual_am","wc_qual_af","copa_america","gold_cup","conmebol_lib","acl","cl","el"];
+  const isNeutral = neutralLeagues.includes(currentLeague?.id);
+  const venueNote = isNeutral
+    ? "Terrain neutre · Pas d'avantage domicile · Match sur terrain tiers"
+    : "Avantage domicile pris en compte · Stade de "+home;
+
+  const risque=confiance>=75?"faible":confiance>=58?"moyen":"élevé";
+
+  return{
+    resultat,confiance,score,butsTotal:total,
+    analyse,facteurs,
+    probaDomicile:pH,probaNull:pN,probaExterieur:pA,
+    overUnder:total>=3?"Over 2.5":"Under 2.5",
+    btts:goalsH>0&&goalsA>0,
+    formeHome:formeH,formeAway:formeA,
+    blessesHome:blessesH,blessesAway:blessesA,
+    joueursClesHome:joueursH,joueursClesAway:joueursA,
+    buteursHome:buteursH, buteursAway:buteursA,
+    lineupHome:lineupH, lineupAway:lineupA,
+    formationHome:formationH, formationAway:formationA,
+    penaltyRisk,
+    h2h: h2hStr,
+    meteo: venueNote,
+    risque
+  };
+}
+
+const COLORS={
+  "Victoire domicile":"#00e676",
+  "Match nul":"#ffb300",
+  "Victoire extérieur":"#ff4081"
+};
+
+let currentLeague=LEAGUES[0];
+let history=[];
+
+function switchTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('show');
+  btn.classList.add('active');
+  if(id==='history')renderHistory();
+}
+
+function buildLeagueBar(){
+  const bar=document.getElementById('leagueBar');
+  bar.innerHTML='';
+  LEAGUES.forEach((lg,i)=>{
+    const btn=document.createElement('button');
+    btn.className='chip'+(i===0?' active':'');
+    btn.textContent=lg.flag+' '+lg.name;
+    btn.onclick=()=>{
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      currentLeague=lg;
+      fillTeams();
+      document.getElementById('result').style.display='none';
+    };
+    bar.appendChild(btn);
+  });
+}
+
+function fillTeams(){
+  const h=document.getElementById('homeTeam');
+  const a=document.getElementById('awayTeam');
+  h.innerHTML=''; a.innerHTML='';
+  currentLeague.teams.forEach((t)=>{
+    h.innerHTML+=`<option value="${t}">${t}</option>`;
+    a.innerHTML+=`<option value="${t}">${t}</option>`;
+  });
+  // Toujours sélectionner 2 équipes différentes
+  h.selectedIndex=0;
+  a.selectedIndex=currentLeague.teams.length>1?1:0;
+  // Mettre à jour le label selon le type de compétition
+  updateVenueLabels();
+}
+
+function updateVenueLabels(){
+  const neutralLeagues=["friendly_clubs","friendly_nations","euro_qual","wc_qual_am","wc_qual_af","copa_america","gold_cup","conmebol_lib","acl","cl","el"];
+  const isNeutral=neutralLeagues.includes(currentLeague.id);
+  document.querySelector('.team-block:first-child label').textContent = isNeutral ? '🏟 ÉQUIPE 1' : '🏠 DOMICILE';
+  document.querySelector('.team-block:last-child label').textContent = isNeutral ? '🏟 ÉQUIPE 2' : '✈ EXTÉRIEUR';
+}
+
+function formeChips(arr){
+  return arr.map(r=>`<div class="forme-chip ${r}">${r}</div>`).join('');
+}
+
+function generate(){
+  const home=document.getElementById('homeTeam').value;
+  const away=document.getElementById('awayTeam').value;
+  if(home===away){alert('Choisissez 2 équipes différentes !');return;}
+
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  document.getElementById('result').style.display='none';
+
+  const steps=[
+    {t:0,   msg:"📊 Analyse des statistiques..."},
+    {t:600, msg:"🚑 Vérification blessés · suspendus..."},
+    {t:1200,msg:"📋 Composition et buteurs potentiels..."},
+    {t:1800,msg:"🟡 Calcul risque penalty..."},
+    {t:2300,msg:"🧠 Génération du pronostic final..."},
+  ];
+  steps.forEach(s=>{
+    setTimeout(()=>{
+      btn.innerHTML=`<div class="loading-row"><div class="spinner"></div><span class="loading-txt">${s.msg}</span></div>`;
+    },s.t);
+  });
+
+  setTimeout(()=>{
+    try {
+      const p = buildProno(home, away, currentLeague.name);
+      showResult(p, home, away);
+      history.unshift({
+        id:Date.now(), league:currentLeague.name, flag:currentLeague.flag,
+        home, away, prono:p,
+        date:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+      });
+      if(history.length>20)history.pop();
+    } catch(e) {
+      console.error(e);
+      document.getElementById('result').innerHTML=`<div style="color:#ff4081;font-family:'Barlow',sans-serif;padding:20px;background:#1a0d10;border-radius:12px;border:1px solid #ff408130">❌ Erreur : ${e.message}</div>`;
+      document.getElementById('result').style.display='block';
+    }
+    btn.disabled=false;
+    btn.innerHTML='⚡ GÉNÉRER LE PRONOSTIC';
+  }, 2800);
+}
+
+function showResult(p, home, away){
+  const col=COLORS[p.resultat]||'#00e676';
+  const confCol=p.confiance>=75?'#00e676':p.confiance>=55?'#ffb300':'#ff4081';
+  const riskCol=p.risque==='faible'?'#00e676':p.risque==='moyen'?'#ffb300':'#ff4081';
+
+  const injH=p.blessesHome.length?p.blessesHome.map(x=>`<div class="injury-item"><span class="injury-x">✕</span>${x}</div>`).join(''):`<div class="none-txt">Aucune absence signalée</div>`;
+  const injA=p.blessesAway.length?p.blessesAway.map(x=>`<div class="injury-item"><span class="injury-x">✕</span>${x}</div>`).join(''):`<div class="none-txt">Aucune absence signalée</div>`;
+  const jH=p.joueursClesHome.length?p.joueursClesHome.map(x=>`<div class="star-item"><span class="star-ico">★</span>${x}</div>`).join(''):`<div class="none-txt">Non disponible</div>`;
+  const jA=p.joueursClesAway.length?p.joueursClesAway.map(x=>`<div class="star-item"><span class="star-ico">★</span>${x}</div>`).join(''):`<div class="none-txt">Non disponible</div>`;
+
+  const bH=p.buteursHome.map(x=>`<div class="star-item"><span style="color:#ff9800">⚽</span>${x}</div>`).join('');
+  const bA=p.buteursAway.map(x=>`<div class="star-item"><span style="color:#ff9800">⚽</span>${x}</div>`).join('');
+
+  const pen=p.penaltyRisk;
+  const penSection=`
+    <div class="card-sm" style="border:1px solid ${pen.couleur}40;margin-bottom:14px">
+      <div class="label" style="color:${pen.couleur}">🟡 RISQUE DE PENALTY</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:8px">
+        <div>
+          <div style="font-size:36px;color:${pen.couleur};line-height:1">${pen.probabilite}%</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;color:${pen.couleur};letter-spacing:2px;margin-top:2px">${pen.niveau}</div>
+        </div>
+        <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;text-align:right">
+          <div style="margin-bottom:4px">🎯 Tireur ${home} : <strong>${pen.tireurHome}</strong></div>
+          <div>🎯 Tireur ${away} : <strong>${pen.tireurAway}</strong></div>
+        </div>
+      </div>
+      <div style="margin-top:12px;height:8px;background:#162235;border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${pen.probabilite}%;background:${pen.couleur};border-radius:4px;transition:width 1s ease"></div>
+      </div>
+    </div>`;
+
+  const lineupSection = (p.lineupHome || p.lineupAway) ? `
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="card-sm" style="border:1px solid #7c4dff40">
+        <div class="label" style="color:#7c4dff">📋 COMPO · ${home} (${p.formationHome})</div>
+        ${p.lineupHome ? p.lineupHome.map(x=>`<div class="star-item"><span style="color:#7c4dff">▸</span>${x}</div>`).join('') : '<div class="none-txt">Composition non encore disponible</div>'}
+      </div>
+      <div class="card-sm" style="border:1px solid #7c4dff40">
+        <div class="label" style="color:#7c4dff">📋 COMPO · ${away} (${p.formationAway})</div>
+        ${p.lineupAway ? p.lineupAway.map(x=>`<div class="star-item"><span style="color:#7c4dff">▸</span>${x}</div>`).join('') : '<div class="none-txt">Composition non encore disponible</div>'}
+      </div>
+    </div>` : `
+    <div class="card-sm" style="border:1px solid #7c4dff40;margin-bottom:14px">
+      <div class="label" style="color:#7c4dff">📋 COMPOSITIONS PROBABLES</div>
+      <div class="grid2" style="margin-top:8px">
+        <div>
+          <div class="team-info">${home} · <span style="color:#7c4dff">${p.formationHome}</span></div>
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70;margin-top:4px">Composition officielle disponible ~1h avant le coup d'envoi</div>
+        </div>
+        <div>
+          <div class="team-info">${away} · <span style="color:#7c4dff">${p.formationAway}</span></div>
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70;margin-top:4px">Composition officielle disponible ~1h avant le coup d'envoi</div>
+        </div>
+      </div>
+    </div>`;
+
+  const html=`
+    <div class="live-badge"><div class="live-dot"></div><span class="live-txt">ANALYSE COMPLÈTE · BLESSÉS · BUTEURS · PENALTY</span></div>
+
+    <div class="card" style="border:1px solid ${col}40;box-shadow:0 0 40px ${col}15">
+      <div class="verdict-row">
+        <div>
+          <div class="label">VERDICT</div>
+          <div class="verdict-result" style="color:${col}">${p.resultat}</div>
+          <div class="verdict-sub">${home} ${p.score} ${away}</div>
+        </div>
+        <div>
+          <div class="label" style="text-align:right">CONFIANCE</div>
+          <div class="confidence" style="color:${confCol};text-align:right">${p.confiance}%</div>
+          <div class="conf-sub">${p.confiance>=75?"🔥 HAUTE":p.confiance>=55?"⚡ MOYENNE":"⚠ FAIBLE"} · Risque <span style="color:${riskCol}">${p.risque.toUpperCase()}</span></div>
+        </div>
+      </div>
+      <div class="label">PROBABILITÉS</div>
+      ${[
+        {label:home,pct:p.probaDomicile,col:'#00e676'},
+        {label:'Nul',pct:p.probaNull,col:'#ffb300'},
+        {label:away,pct:p.probaExterieur,col:'#ff4081'}
+      ].map(x=>`
+        <div class="prob-row">
+          <div class="prob-label">${x.label}</div>
+          <div class="prob-track"><div class="prob-bar" style="--w:${x.pct}%;background:${x.col}"></div></div>
+          <div class="prob-pct" style="color:${x.col}">${x.pct}%</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="grid2">
+      <div class="card-sm" style="border:1px solid #1e2e45">
+        <div class="label">FORME · ${home}</div>
+        <div class="forme-chips">${formeChips(p.formeHome)}</div>
+      </div>
+      <div class="card-sm" style="border:1px solid #1e2e45">
+        <div class="label">FORME · ${away}</div>
+        <div class="forme-chips">${formeChips(p.formeAway)}</div>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="stat-card"><div class="label">TOTAL BUTS</div><div class="stat-val">${p.butsTotal}</div><div class="stat-sub">Score: ${p.score}</div></div>
+      <div class="stat-card"><div class="label">OVER/UNDER</div><div class="stat-val">${p.overUnder}</div><div class="stat-sub">2.5 buts</div></div>
+      <div class="stat-card"><div class="label">BTTS</div><div class="stat-val">${p.btts?"OUI ✅":"NON ❌"}</div><div class="stat-sub">Les 2 marquent</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card-sm" style="border:1px solid #ff408130">
+        <div class="label" style="color:#ff4081">🚑 BLESSÉS / SUSPENDUS</div>
+        <div class="team-info">${home}</div>${injH}
+      </div>
+      <div class="card-sm" style="border:1px solid #ff408130">
+        <div class="label" style="color:#ff4081">🚑 BLESSÉS / SUSPENDUS</div>
+        <div class="team-info">${away}</div>${injA}
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card-sm" style="border:1px solid #ff980040">
+        <div class="label" style="color:#ff9800">⚽ BUTEURS POTENTIELS</div>
+        <div class="team-info">${home}</div>${bH}
+      </div>
+      <div class="card-sm" style="border:1px solid #ff980040">
+        <div class="label" style="color:#ff9800">⚽ BUTEURS POTENTIELS</div>
+        <div class="team-info">${away}</div>${bA}
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card-sm" style="border:1px solid #00e67630">
+        <div class="label" style="color:#00e676">⭐ JOUEURS DÉCISIFS</div>
+        <div class="team-info">${home}</div>${jH}
+      </div>
+      <div class="card-sm" style="border:1px solid #00e67630">
+        <div class="label" style="color:#00e676">⭐ JOUEURS DÉCISIFS</div>
+        <div class="team-info">${away}</div>${jA}
+      </div>
+    </div>
+
+    ${penSection}
+    ${lineupSection}
+
+    <div class="grid2">
+      <div class="card-sm" style="border:1px solid #1e2e45">
+        <div class="label" style="color:#ffb300">⚔ CONFRONTATIONS DIRECTES</div>
+        <div class="analyse-txt" style="font-size:12px">${p.h2h}</div>
+      </div>
+      <div class="card-sm" style="border:1px solid #1e2e45">
+        <div class="label" style="color:#00bcd4">🌤 CONTEXTE DU MATCH</div>
+        <div class="analyse-txt" style="font-size:12px">${p.meteo}</div>
+      </div>
+    </div>
+
+    <div class="card-sm" style="border:1px solid #1e2e45">
+      <div class="label">📋 ANALYSE COMPLÈTE</div>
+      <p class="analyse-txt">${p.analyse}</p>
+    </div>
+
+    <div class="card-sm" style="border:1px solid #1e2e45">
+      <div class="label">🎯 FACTEURS DÉCISIFS</div>
+      ${p.facteurs.map(f=>`<div class="factor-row"><span class="factor-arrow">▶</span><span class="factor-txt">${f}</span></div>`).join('')}
+    </div>
+
+    <p class="disclaimer">⚠ Pronostic à titre informatif uniquement. Jouer peut créer une dépendance.</p>
+  `;
+
+  const res=document.getElementById('result');
+  res.innerHTML=html;
+  res.style.display='block';
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderHistory(){
+  const list=document.getElementById('histList');
+  if(history.length===0){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">📋</div><p>Aucun pronostic généré pour l'instant.</p><p style="font-size:13px;margin-top:8px">Lancez votre premier prono !</p></div>`;
+    return;
+  }
+  list.innerHTML=history.map(h=>{
+    const col=COLORS[h.prono.resultat]||'#00e676';
+    const cc=h.prono.confiance>=75?'#00e676':h.prono.confiance>=55?'#ffb300':'#ff4081';
+    return`<div class="hist-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <div class="hist-meta">${h.flag} ${h.league} · ${h.date}</div>
+          <div class="hist-teams">${h.home} <span class="hist-vs">vs</span> ${h.away}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hist-result" style="color:${col}">${h.prono.resultat}</div>
+          <div class="hist-score">Score prédit : <strong>${h.prono.score}</strong></div>
+          <div class="hist-conf" style="color:${cc}">Confiance : ${h.prono.confiance}%</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Init
+buildLeagueBar();
+fillTeams();
+</script>
+</body>
+</html>
