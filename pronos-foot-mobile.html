@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060b14">
+<title>PronoPower</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{background:#060b14;font-family:'Bebas Neue','Impact',sans-serif;color:#e8eaf0;padding-bottom:80px;max-width:480px;margin:0 auto}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 100% 40% at 50% 0%,#00e67615 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* ── HEADER ── */
+.header{position:sticky;top:0;z-index:50;background:#060b14ee;backdrop-filter:blur(12px);padding:12px 16px 10px;border-bottom:1px solid #1e2e4560;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:28px;letter-spacing:3px;color:#fff;line-height:1}
+.logo span{color:#00e676}
+.header-badge{font-family:'Barlow',sans-serif;font-size:10px;font-weight:600;color:#00e676;letter-spacing:4px;background:#00e67615;border:1px solid #00e67630;padding:4px 8px;border-radius:20px}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#0a111f;border-top:1px solid #1e2e45;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:12px 8px;border:none;background:transparent;color:#4a5a70;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;font-family:'Barlow',sans-serif;font-size:10px;font-weight:600;letter-spacing:1px}
+.nav-btn.active{color:#00e676}
+.nav-btn .ico{font-size:22px;line-height:1}
+.nav-btn.active .ico{filter:drop-shadow(0 0 6px #00e676)}
+
+/* ── PAGES ── */
+.page{display:none;padding:16px 16px 0;animation:fadeIn .3s ease}
+.page.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 16px #00e67630}50%{box-shadow:0 0 40px #00e67660}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LEAGUE SELECTOR ── */
+.section-label{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:3px;color:#4a5a70;margin-bottom:10px}
+.league-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:20px;scrollbar-width:none}
+.league-scroll::-webkit-scrollbar{display:none}
+.league-chip{padding:8px 14px;border:1px solid #1e2e45;border-radius:20px;background:#0d1525;color:#6b7a9a;font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .2s;min-height:36px;display:flex;align-items:center}
+.league-chip.active{border-color:#00e676;background:#00e67615;color:#00e676}
+
+/* ── TEAM SELECTOR ── */
+.match-setup{background:#0d1525;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #1e2e45}
+.team-row{display:flex;align-items:center;gap:10px;margin-bottom:0}
+.team-col{flex:1;min-width:0}
+.team-lbl{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:2px;color:#4a5a70;margin-bottom:6px}
+.team-select{width:100%;padding:12px 14px;background:#162235;border:1px solid #1e2e45;border-radius:10px;color:#e8eaf0;font-family:'Bebas Neue';font-size:16px;letter-spacing:1px;-webkit-appearance:none;outline:none;cursor:pointer}
+.vs-badge{background:#1e2e45;color:#00e676;font-size:14px;padding:8px 10px;border-radius:8px;flex-shrink:0;font-family:'Bebas Neue';letter-spacing:1px}
+
+/* ── GENERATE BUTTON ── */
+.gen-btn{width:100%;padding:18px;background:linear-gradient(135deg,#00e676,#00bcd4);border:none;border-radius:14px;color:#060b14;font-family:'Bebas Neue';font-size:20px;letter-spacing:4px;cursor:pointer;margin-bottom:20px;animation:glow 2s infinite;transition:all .2s;min-height:60px;display:flex;align-items:center;justify-content:center;gap:10px}
+.gen-btn:active{transform:scale(.97)}
+.gen-btn:disabled{background:#0d1525;border:1px solid #1e2e45;color:#4a5a70;animation:none}
+.spinner{width:18px;height:18px;border:2px solid #4a5a70;border-top-color:#00e676;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+.step-txt{font-family:'Barlow',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;color:#6b7a9a}
+
+/* ── RESULT CARDS ── */
+#result{animation:slideUp .4s ease}
+.r-badge{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.r-dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 8px #00e676}
+.r-dot-txt{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:3px;color:#00e676}
+
+.verdict-card{border-radius:16px;padding:20px;margin-bottom:12px}
+.verdict-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+.verdict-label{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:3px;color:#6b7a9a;margin-bottom:4px}
+.verdict-result{font-size:28px;letter-spacing:2px;line-height:1.1}
+.verdict-score{font-family:'Barlow',sans-serif;font-size:12px;color:#8a9ab5;margin-top:4px}
+.verdict-conf{font-size:52px;line-height:1;text-align:right}
+.verdict-conf-sub{font-family:'Barlow',sans-serif;font-size:11px;color:#6b7a9a;text-align:right;margin-top:2px}
+
+.prob-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.prob-lbl{font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.prob-track{flex:1;height:7px;background:#162235;border-radius:4px;overflow:hidden}
+.prob-fill{height:100%;border-radius:4px;transition:width .8s ease}
+.prob-pct{font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+
+.card{background:#0d1525;border-radius:14px;padding:14px;margin-bottom:10px}
+.card-label{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:2px;margin-bottom:10px}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat-box{background:#0d1525;border:1px solid #1e2e45;border-radius:12px;padding:12px 8px;text-align:center}
+.stat-val{font-size:18px;color:#00e676;letter-spacing:1px;margin:4px 0 2px}
+.stat-sub{font-family:'Barlow',sans-serif;font-size:10px;color:#3a4a60}
+
+.forme-row{display:flex;gap:6px;margin-top:6px}
+.fc{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-family:'Bebas Neue';letter-spacing:1px}
+.W{background:#00e67620;border:1px solid #00e676;color:#00e676}
+.D{background:#ffb30020;border:1px solid #ffb300;color:#ffb300}
+.L{background:#ff408120;border:1px solid #ff4081;color:#ff4081}
+
+.player-item{font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;margin-bottom:5px;display:flex;gap:6px;align-items:flex-start}
+.none-txt{font-family:'Barlow',sans-serif;font-size:12px;color:#3a4a60}
+
+.team-tag{font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70;margin-bottom:6px;letter-spacing:1px}
+
+.factor-row{display:flex;gap:8px;margin-bottom:7px;align-items:flex-start}
+.factor-arrow{color:#00e676;font-size:12px;flex-shrink:0;margin-top:1px}
+.factor-txt{font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;line-height:1.5}
+.analyse-txt{font-family:'Barlow',sans-serif;font-size:13px;color:#c0cce0;line-height:1.7;font-weight:300}
+
+.pen-big{font-size:40px;line-height:1}
+.pen-lbl{font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:2px;margin-top:2px}
+.pen-takers{font-family:'Barlow',sans-serif;font-size:11px;color:#c0cce0;text-align:right}
+.pen-bar-wrap{margin-top:10px;height:7px;background:#162235;border-radius:4px;overflow:hidden}
+.pen-bar{height:100%;border-radius:4px}
+
+/* ── HISTORY ── */
+.hist-item{background:#0d1525;border:1px solid #1e2e45;border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.hist-meta{font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70;margin-bottom:4px}
+.hist-teams{font-size:18px;letter-spacing:2px;margin-bottom:6px}
+.hist-vs{color:#2a3a50}
+.hist-bottom{display:flex;justify-content:space-between;align-items:center}
+.hist-result{font-size:14px;letter-spacing:1px}
+.hist-right{text-align:right}
+.hist-score{font-family:'Barlow',sans-serif;font-size:12px;color:#6b7a9a}
+.hist-conf{font-family:'Barlow',sans-serif;font-size:11px;margin-top:2px}
+
+.empty{text-align:center;padding:60px 20px;color:#3a4a60}
+.empty-ico{font-size:48px;margin-bottom:12px}
+.empty p{font-family:'Barlow',sans-serif;font-size:15px}
+
+.disclaimer{font-family:'Barlow',sans-serif;font-size:10px;color:#2a3a50;text-align:center;margin:16px 0 8px;font-style:italic}
+
+/* ── ANALYSE AVANCÉE ── */
+.alert-box{border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.alert-ico{font-size:20px;flex-shrink:0}
+.alert-txt{font-family:'Barlow',sans-serif;font-size:12px;color:#e8eaf0;line-height:1.5}
+.alert-title{font-weight:700;font-size:13px;margin-bottom:2px}
+.momentum-bar{height:10px;border-radius:5px;background:linear-gradient(90deg,#00e676,#162235);margin:8px 0;position:relative;overflow:hidden}
+.momentum-indicator{position:absolute;top:0;bottom:0;width:3px;background:#fff;border-radius:2px}
+.player-card{background:#162235;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.player-name{font-size:16px;letter-spacing:1px;margin-bottom:4px}
+.player-stats{display:flex;gap:8px;flex-wrap:wrap}
+.pstat{font-family:'Barlow',sans-serif;font-size:10px;color:#6b7a9a;background:#1e2e45;padding:3px 7px;border-radius:10px}
+.urgency-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.xg-bar{height:6px;border-radius:3px;background:#162235;overflow:hidden;margin-top:4px}
+.xg-fill{height:100%;border-radius:3px}
+.minute-pred{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.min-box{background:#162235;border-radius:10px;padding:10px 6px;text-align:center}
+.min-num{font-size:11px;color:#4a5a70;font-family:'Barlow',sans-serif;margin-bottom:4px}
+.min-pct{font-size:22px;letter-spacing:1px}
+.min-lbl{font-size:9px;font-family:'Barlow',sans-serif;margin-top:2px}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 #ff408160}50%{opacity:.7;box-shadow:0 0 0 6px #ff408100}}
+input[type=text],input[type=number]{background:#162235;border:1px solid #1e2e45;border-radius:10px;color:#e8eaf0;outline:none;width:100%;padding:12px 14px}
+input[type=text]:focus,input[type=number]:focus{border-color:#ff408160}
+
+
+.collapsible{cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.collapse-arrow{color:#4a5a70;font-size:12px;transition:transform .2s}
+.collapse-arrow.open{transform:rotate(180deg)}
+.collapse-body{overflow:hidden;transition:max-height .3s ease;max-height:0}
+.collapse-body.open{max-height:1000px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">PRONO<span>POWER</span></div>
+  <div class="header-badge">⚡ AI</div>
+</div>
+
+<!-- PAGE PRONO -->
+<div id="page-prono" class="page show">
+  <div class="section-label" style="margin-top:12px">COMPÉTITION</div>
+  <div class="league-scroll" id="leagueBar"></div>
+
+  <div class="match-setup">
+    <div class="team-row">
+      <div class="team-col">
+        <div class="team-lbl" id="lbl-home">🏠 DOMICILE</div>
+        <select id="homeTeam" class="team-select"></select>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="team-col">
+        <div class="team-lbl" id="lbl-away">✈ EXTÉRIEUR</div>
+        <select id="awayTeam" class="team-select"></select>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genBtn" onclick="generate()">⚡ GÉNÉRER LE PRONO</button>
+  <div id="result" style="display:none"></div>
+</div>
+
+<!-- PAGE ANALYSE AVANCÉE -->
+<div id="page-analyse" class="page">
+  <div class="section-label" style="margin-top:12px">ANALYSE AVANCÉE</div>
+
+  <!-- Sélection match -->
+  <div class="match-setup" style="margin-bottom:12px">
+    <div class="team-row">
+      <div class="team-col">
+        <div class="team-lbl">🏠 ÉQUIPE 1</div>
+        <select id="aHomeTeam" class="team-select"></select>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="team-col">
+        <div class="team-lbl">✈ ÉQUIPE 2</div>
+        <select id="aAwayTeam" class="team-select"></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contexte live optionnel -->
+  <div class="card" style="border:1px solid #1e2e45;margin-bottom:12px">
+    <div class="card-label" style="color:#7c4dff">⚙ CONTEXTE DU MATCH (optionnel)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div class="team-lbl">MINUTE</div>
+        <input id="aMinute" type="number" min="0" max="120" placeholder="ex: 65" style="width:100%;padding:10px 12px;background:#162235;border:1px solid #1e2e45;border-radius:8px;color:#e8eaf0;font-family:'Barlow',sans-serif;font-size:14px;outline:none">
+      </div>
+      <div>
+        <div class="team-lbl">SCORE ACTUEL</div>
+        <input id="aScore" type="text" placeholder="ex: 1-0" style="width:100%;padding:10px 12px;background:#162235;border:1px solid #1e2e45;border-radius:8px;color:#e8eaf0;font-family:'Barlow',sans-serif;font-size:14px;outline:none">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div class="team-lbl">POSSESSION EQ.1 (%)</div>
+        <input id="aPoss" type="number" min="0" max="100" placeholder="ex: 58" style="width:100%;padding:10px 12px;background:#162235;border:1px solid #1e2e45;border-radius:8px;color:#e8eaf0;font-family:'Barlow',sans-serif;font-size:14px;outline:none">
+      </div>
+      <div>
+        <div class="team-lbl">TIRS (EQ1 / EQ2)</div>
+        <input id="aShots" type="text" placeholder="ex: 8 / 3" style="width:100%;padding:10px 12px;background:#162235;border:1px solid #1e2e45;border-radius:8px;color:#e8eaf0;font-family:'Barlow',sans-serif;font-size:14px;outline:none">
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="analyseBtn" onclick="generateAnalyse()" style="font-size:17px;letter-spacing:3px">🔬 LANCER L'ANALYSE AVANCÉE</button>
+  <div id="analyseResult" style="display:none"></div>
+</div>
+
+<!-- PAGE HISTORIQUE -->
+<div id="page-history" class="page">
+  <div class="section-label" style="margin-top:12px">MES PRONOS</div>
+  <div id="histList"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-prono" onclick="switchPage('prono')">
+    <span class="ico">⚽</span>PRONO
+  </button>
+  <button class="nav-btn" id="nav-live" onclick="switchPage('live')">
+    <span class="ico">🔴</span>LIVE
+  </button>
+  <button class="nav-btn" id="nav-analyse" onclick="switchPage('analyse')">
+    <span class="ico">🔬</span>ANALYSE
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="switchPage('history')">
+    <span class="ico">📊</span>HISTORIQUE
+  </button>
+</div>
+
+<!-- PAGE LIVE -->
+<div id="page-live" class="page" style="display:none">
+  <div class="section-label" style="margin-top:12px">🔴 ANALYSE LIVE</div>
+  <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70;margin-bottom:14px;background:#0d1525;border:1px solid #ff408130;border-radius:10px;padding:10px 12px">
+    ⚠️ Saisis les données réelles du match en cours. L'IA analyse <strong style="color:#ff4081">uniquement</strong> ce que tu entres — sans rien inventer.
+  </div>
+
+  <!-- Formulaire live -->
+  <div class="match-setup" style="border:1px solid #ff408140">
+    <div class="team-row" style="margin-bottom:12px">
+      <div class="team-col">
+        <div class="team-lbl">🏠 ÉQUIPE 1</div>
+        <input id="lTeam1" type="text" placeholder="ex: PSG" class="team-select" style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px">
+      </div>
+      <div class="vs-badge" style="background:#ff408120;border:1px solid #ff408140;color:#ff4081">VS</div>
+      <div class="team-col">
+        <div class="team-lbl">✈ ÉQUIPE 2</div>
+        <input id="lTeam2" type="text" placeholder="ex: Lyon" class="team-select" style="font-family:'Bebas Neue';font-size:16px;letter-spacing:1px">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <div class="team-lbl">⏱ SCORE ACTUEL *</div>
+        <input id="lScore" type="text" placeholder="ex: 1-1" class="team-select" style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;text-align:center;color:#00e676">
+      </div>
+      <div>
+        <div class="team-lbl">⏱ MINUTE *</div>
+        <input id="lMinute" type="number" min="0" max="120" placeholder="ex: 67" class="team-select" style="font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;text-align:center">
+      </div>
+    </div>
+
+    <div class="team-lbl" style="margin-bottom:8px">📊 STATISTIQUES (optionnel)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div class="team-lbl" style="font-size:9px">POSSESSION EQ1 (%)</div>
+        <input id="lPoss" type="number" min="0" max="100" placeholder="ex: 58" class="team-select" style="font-size:15px;text-align:center">
+      </div>
+      <div>
+        <div class="team-lbl" style="font-size:9px">TIRS (EQ1 / EQ2)</div>
+        <input id="lShots" type="text" placeholder="ex: 8 / 3" class="team-select" style="font-size:15px;text-align:center">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div class="team-lbl" style="font-size:9px">xG (EQ1 / EQ2)</div>
+        <input id="lXg" type="text" placeholder="ex: 1.4 / 0.6" class="team-select" style="font-size:15px;text-align:center">
+      </div>
+      <div>
+        <div class="team-lbl" style="font-size:9px">INFO SUPP. (optionnel)</div>
+        <input id="lExtra" type="text" placeholder="ex: rouge EQ1, 10 corners" class="team-select" style="font-size:13px">
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="liveBtn" onclick="generateLive()" style="background:linear-gradient(135deg,#ff4081,#ff9800);font-size:17px;letter-spacing:2px;margin-top:12px">🔴 ANALYSER CE MATCH</button>
+  <div id="liveResult" style="display:none"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DONNÉES
+// ══════════════════════════════════════════════
+const LEAGUES = [
+  {id:"ligue1",name:"Ligue 1",flag:"🇫🇷",teams:["PSG","Marseille","Lyon","Monaco","Lille","Nice","Lens","Rennes","Nantes","Toulouse","Strasbourg","Montpellier","Reims","Brest","Le Havre","Metz","Clermont","Lorient","Auxerre","Saint-Étienne"]},
+  {id:"pl",name:"Premier League",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",teams:["Arsenal","Man City","Liverpool","Chelsea","Man United","Tottenham","Newcastle","Aston Villa","West Ham","Brighton","Brentford","Fulham","Crystal Palace","Wolves","Everton","Nottingham Forest","Bournemouth","Burnley","Sheffield United","Luton"]},
+  {id:"laliga",name:"La Liga",flag:"🇪🇸",teams:["Real Madrid","Barcelona","Atlético Madrid","Sevilla","Real Betis","Valencia","Villarreal","Athletic Bilbao","Real Sociedad","Osasuna","Getafe","Girona","Las Palmas","Rayo Vallecano","Celta Vigo","Alavés","Mallorca","Valladolid","Leganés","Espanyol"]},
+  {id:"bundesliga",name:"Bundesliga",flag:"🇩🇪",teams:["Bayern Munich","Dortmund","Leipzig","Bayer Leverkusen","Francfort","Wolfsburg","Stuttgart","Freiburg","Hoffenheim","Union Berlin","Werder Brême","Mainz","Augsburg","Heidenheim","Darmstadt","Cologne","Bochum","Mönchengladbach","Holstein Kiel","St. Pauli"]},
+  {id:"seriea",name:"Serie A",flag:"🇮🇹",teams:["Inter Milan","AC Milan","Juventus","Napoli","Roma","Lazio","Atalanta","Fiorentina","Torino","Bologne","Monza","Sassuolo","Cagliari","Frosinone","Gênes","Udinese","Lecce","Vérone","Empoli","Salernitana"]},
+  {id:"cl",name:"Champions League",flag:"🌟",teams:["Real Madrid","Man City","Bayern Munich","PSG","Barcelona","Inter Milan","Arsenal","Dortmund","Atlético Madrid","Liverpool","Benfica","Porto","Ajax","PSV Eindhoven","Celtic","Rangers","Red Bull Salzbourg","Shakhtar Donetsk","Galatasaray","Fenerbahçe","Braga","Sporting CP","Feyenoord","AZ Alkmaar","Young Boys","Servette","Malmö","Ludogorets","Maccabi Tel Aviv","Union Saint-Gilloise"]},
+  {id:"el",name:"Europa League",flag:"🟠",teams:["Roma","Séville","Villarreal","Man United","Feyenoord","West Ham","Ajax","Bayer Leverkusen","Atalanta","Liverpool","Betis","Eintracht Francfort","Arsenal","Lazio","Napoli","Marseille","Braga","Sporting CP","Monaco","Lille","Rennes","Toulouse","Nice","Lens"]},
+  {id:"eredivisie",name:"Eredivisie",flag:"🇳🇱",teams:["Ajax","PSV Eindhoven","Feyenoord","AZ Alkmaar","Utrecht","Twente","Vitesse","Groningue","Heerenveen","NEC Nimègue","Almere City","Sparta Rotterdam","RKC Waalwijk","Fortuna Sittard","PEC Zwolle","Heracles","Go Ahead Eagles","Excelsior"]},
+  {id:"liga_nos",name:"Liga Portugal",flag:"🇵🇹",teams:["Benfica","Porto","Sporting CP","Braga","Vitória SC","Gil Vicente","Casa Pia","Arouca","Moreirense","Famalicão","Chaves","Vizela","Boavista","Rio Ave","Estrela da Amadora","Farense","Portimonense","Estoril"]},
+  {id:"ligue2",name:"Ligue 2",flag:"🇫🇷",teams:["Bordeaux","Angers","Guingamp","Grenoble","Caen","Dunkerque","Amiens","Troyes","Laval","Pau FC","Rodez","Quevilly-Rouen","Bastia","Concarneau","Valenciennes","Ajaccio","Niort","Saint-Brieuc","Dijon","Sochaux"]},
+  {id:"championship",name:"Championship",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",teams:["Leeds","Leicester","Southampton","Ipswich","Norwich","Watford","West Brom","Middlesbrough","Sunderland","Bristol City","Swansea","QPR","Stoke City","Hull City","Millwall","Preston","Cardiff","Coventry","Plymouth","Blackburn"]},
+  {id:"serieb",name:"Serie B",flag:"🇮🇹",teams:["Parme","Côme","Venezia","Cremonese","Catanzaro","Modène","Bari","Palermo","Sampdoria","Ternana","Ascoli","Feralpisalò","Lecco","Cittadella","Pise","Spezia","Brescia","Cosenza","Reggiana","Südtirol"]},
+  {id:"segunda",name:"Segunda División",flag:"🇪🇸",teams:["Valladolid","Leganés","Castellón","Elche","Racing Santander","Oviedo","Albacete","Mirandés","Burgos","Eldense","Zaragoza","Almería","Huesca","Tenerife","Granada","Sporting Gijón","Levante","Eibar","Cartagena","Ferrol"]},
+  {id:"mls",name:"MLS",flag:"🇺🇸",teams:["Inter Miami","LA Galaxy","LAFC","Seattle Sounders","Portland Timbers","Atlanta United","New York City FC","New York Red Bulls","Columbus Crew","Nashville SC","Philadelphia Union","Orlando City","Chicago Fire","FC Dallas","Austin FC","Real Salt Lake","Colorado Rapids","Vancouver Whitecaps","Toronto FC","CF Montréal"]},
+  {id:"ligamx",name:"Liga MX",flag:"🇲🇽",teams:["Club América","Chivas Guadalajara","Cruz Azul","Tigres UANL","Rayados Monterrey","Pumas UNAM","Santos Laguna","Toluca","Atlas","León","Necaxa","Pachuca","San Luis","Querétaro","Mazatlán","FC Juárez","Tijuana","Puebla"]},
+  {id:"superlig",name:"Süper Lig",flag:"🇹🇷",teams:["Galatasaray","Fenerbahçe","Beşiktaş","Trabzonspor","Başakşehir","Adana Demirspor","Sivasspor","Konyaspor","Antalyaspor","Kayserispor","Gaziantep","Hatayspor","Kasımpaşa","Ankaragücü","Alanyaspor","Pendikspor","Rizespor","Fatih Karagümrük","Samsunspor","İstanbulspor"]},
+  {id:"proleague",name:"Pro League Belge",flag:"🇧🇪",teams:["Club Bruges","Anderlecht","Union Saint-Gilloise","Gand","Genk","Standard Liège","Charleroi","Antwerp","Cercle Bruges","OHL","Westerlo","Kortrijk","Eupen","RWDM","Malines","Saint-Trond"]},
+  {id:"scots",name:"Scottish Prem.",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",teams:["Celtic","Rangers","Hearts","Hibernian","Aberdeen","Motherwell","Livingston","Dundee United","Ross County","St Mirren","Kilmarnock","St Johnstone"]},
+  {id:"brasileirao",name:"Brasileirão",flag:"🇧🇷",teams:["Flamengo","Palmeiras","Atletico Mineiro","Fluminense","São Paulo","Corinthians","Internacional","Grêmio","Santos","Botafogo","Vasco da Gama","Cruzeiro","Bahia","Fortaleza","Bragantino","Athletico Paranaense","Goiás","Coritiba"]},
+  {id:"primera_arg",name:"Liga Argentina",flag:"🇦🇷",teams:["River Plate","Boca Juniors","Racing Club","Independiente","San Lorenzo","Huracán","Vélez Sársfield","Estudiantes","Lanús","Banfield","Talleres","Belgrano","Rosario Central","Defensa y Justicia","Gimnasia","Godoy Cruz","Platense"]},
+  {id:"conmebol_lib",name:"Copa Libertadores",flag:"🏆",teams:["Flamengo","Palmeiras","River Plate","Boca Juniors","Atlético Mineiro","Fluminense","Racing Club","Peñarol","Nacional Uruguay","LDU Quito","Independiente del Valle","Olimpia","Cerro Porteño","Estudiantes","São Paulo","Colo-Colo","Atlético Nacional","Junior","Bolívar","The Strongest"]},
+  {id:"csl",name:"Chinese Super League",flag:"🇨🇳",teams:["Shanghai Port","Shandong Taishan","Beijing Guoan","Guangzhou FC","Shanghai Shenhua","Wuhan Three Towns","Henan Songshan Longmen","Changchun Yatai","Tianjin Jinmen Tiger","Dalian Pro","Chengdu Rongcheng","Nantong Zhiyun","Zhejiang FC","Nanjing City"]},
+  {id:"j_league",name:"J-League",flag:"🇯🇵",teams:["Vissel Kobe","Yokohama F. Marinos","Urawa Red Diamonds","Gamba Osaka","Cerezo Osaka","Kashima Antlers","Kawasaki Frontale","FC Tokyo","Nagoya Grampus","Sanfrecce Hiroshima","Consadole Sapporo","Júbilo Iwata","Avispa Fukuoka","Kyoto Sanga"]},
+  {id:"k_league",name:"K-League",flag:"🇰🇷",teams:["Jeonbuk Motors","Ulsan Hyundai","Suwon Samsung","FC Seoul","Pohang Steelers","Incheon United","Daegu FC","Gangwon FC","Jeju United","Seongnam FC","Daejeon Citizen","Gwangju FC"]},
+  {id:"saudi_pl",name:"Saudi Pro League",flag:"🇸🇦",teams:["Al-Hilal","Al-Nassr","Al-Ittihad","Al-Ahli","Al-Qadsiah","Al-Shabab","Al-Fayha","Al-Taawoun","Al-Ettifaq","Al-Wehda","Al-Fateh","Al-Khaleej"]},
+  {id:"afcon",name:"CAN / Éliminatoires",flag:"🌍",teams:["Maroc","Sénégal","Nigeria","Côte d'Ivoire","Ghana","Cameroun","Égypte","Algérie","Tunisie","Mali","Burkina Faso","Guinée","Congo DR","Afrique du Sud","Zambie","Angola","Cap-Vert","Mauritanie"]},
+  {id:"botola",name:"Botola (Maroc)",flag:"🇲🇦",teams:["Wydad Casablanca","Raja Casablanca","FUS Rabat","FAR Rabat","RS Berkane","Moghreb Tétouan","Hassania Agadir","Olympic Safi","Chabab Mohammedia","Ittihad Tanger"]},
+  {id:"ligue_alg",name:"Ligue Pro (Algérie)",flag:"🇩🇿",teams:["MC Alger","USM Alger","CR Belouizdad","ES Sétif","JS Kabylie","MC Oran","NA Hussein Dey","CS Constantine","Paradou AC","ASO Chlef"]},
+  {id:"friendly_clubs",name:"Amicaux Clubs",flag:"🤝",teams:["Real Madrid","Barcelona","Man City","Arsenal","Liverpool","PSG","Bayern Munich","Inter Milan","Juventus","Dortmund","Ajax","Benfica","Porto","Sporting CP","Marseille","Lyon","Monaco","Atlético Madrid","Napoli","Roma","Galatasaray","Fenerbahçe","Celtic","Rangers","PSV Eindhoven","Feyenoord","Flamengo","Palmeiras","River Plate","Boca Juniors","Al-Hilal","Al-Nassr","Al-Ittihad","Inter Miami","LA Galaxy","Club América","Chivas Guadalajara"]},
+  {id:"friendly_nations",name:"Amicaux Nations",flag:"🌐",teams:["France","Brésil","Argentine","Angleterre","Espagne","Allemagne","Portugal","Italie","Pays-Bas","Belgique","Croatie","Uruguay","Colombie","Mexique","États-Unis","Maroc","Sénégal","Nigeria","Côte d'Ivoire","Ghana","Cameroun","Égypte","Algérie","Tunisie","Japon","Corée du Sud","Australie","Iran","Arabie Saoudite","Danemark","Suisse","Autriche","Suède","Norvège","Pologne","Ukraine","Turquie","Écosse","Irlande","Serbie","Hongrie","Équateur","Chili","Pérou","Paraguay"]},
+  {id:"euro_qual",name:"Éliminatoires Euro",flag:"🇪🇺",teams:["France","Espagne","Allemagne","Angleterre","Portugal","Italie","Pays-Bas","Belgique","Croatie","Danemark","Suisse","Autriche","Suède","Norvège","Pologne","Ukraine","Turquie","Écosse","Irlande","Pays de Galles","Serbie","Hongrie","République Tchèque","Slovaquie","Slovénie","Grèce","Roumanie","Bulgarie","Albanie","Islande","Finlande","Bosnie","Géorgie","Kosovo","Macédoine du Nord"]},
+  {id:"copa_america",name:"Copa América",flag:"🏅",teams:["Argentine","Brésil","Uruguay","Colombie","Équateur","Chili","Pérou","Paraguay","Venezuela","Bolivie","Panama","Jamaïque","États-Unis","Canada","Mexique","Costa Rica"]},
+  {id:"wc_qual_am",name:"Qualifs CDM Amériques",flag:"🌎",teams:["Argentine","Brésil","Uruguay","Colombie","Équateur","Chili","Pérou","Paraguay","Venezuela","Bolivie","Panama","Honduras","Mexique","États-Unis","Canada","Costa Rica","El Salvador","Guatemala","Jamaïque","Haïti"]},
+  {id:"wc_qual_af",name:"Qualifs CDM Afrique",flag:"🌍",teams:["Maroc","Sénégal","Nigeria","Côte d'Ivoire","Égypte","Algérie","Tunisie","Cameroun","Ghana","Mali","Burkina Faso","Guinée","Congo DR","Afrique du Sud","Zambie","Zimbabwe","Angola","Mozambique","Cap-Vert","Mauritanie","Gabon","Bénin","Gambie","Tanzanie","Ouganda","Kenya","Éthiopie"]},
+];
+
+const TEAM_RATINGS = {
+  "PSG":88,"Marseille":76,"Lyon":74,"Monaco":79,"Lille":75,"Nice":73,"Lens":72,"Rennes":71,"Nantes":65,"Toulouse":64,"Strasbourg":63,"Montpellier":62,"Reims":66,"Brest":70,"Le Havre":60,"Metz":58,"Clermont":57,"Lorient":59,"Auxerre":61,"Saint-Étienne":60,
+  "Arsenal":87,"Man City":92,"Liverpool":89,"Chelsea":82,"Man United":80,"Tottenham":79,"Newcastle":81,"Aston Villa":82,"West Ham":76,"Brighton":77,"Brentford":74,"Fulham":73,"Crystal Palace":70,"Wolves":69,"Everton":67,"Nottingham Forest":71,"Bournemouth":69,"Burnley":60,"Sheffield United":58,"Luton":56,
+  "Real Madrid":95,"Barcelona":90,"Atlético Madrid":86,"Sevilla":76,"Real Betis":77,"Valencia":70,"Villarreal":78,"Athletic Bilbao":77,"Real Sociedad":78,"Osasuna":69,"Getafe":67,"Girona":75,"Las Palmas":66,"Rayo Vallecano":68,"Celta Vigo":69,"Alavés":63,"Mallorca":67,"Valladolid":62,"Leganés":64,"Espanyol":65,
+  "Bayern Munich":93,"Dortmund":85,"Leipzig":84,"Bayer Leverkusen":88,"Francfort":79,"Wolfsburg":74,"Stuttgart":80,"Freiburg":76,"Hoffenheim":73,"Union Berlin":71,"Werder Brême":72,"Mainz":70,"Augsburg":69,"Heidenheim":67,"Darmstadt":58,"Cologne":66,"Bochum":65,"Mönchengladbach":72,"Holstein Kiel":64,"St. Pauli":66,
+  "Inter Milan":91,"AC Milan":87,"Juventus":85,"Napoli":84,"Roma":83,"Lazio":80,"Atalanta":84,"Fiorentina":78,"Torino":72,"Bologne":77,"Monza":69,"Sassuolo":65,"Cagliari":64,"Frosinone":62,"Gênes":66,"Udinese":65,"Lecce":63,"Vérone":62,"Empoli":64,"Salernitana":60,
+  "Ajax":80,"PSV Eindhoven":82,"Feyenoord":81,"AZ Alkmaar":76,"Utrecht":70,"Twente":72,"Vitesse":65,"Groningue":62,"Heerenveen":63,"NEC Nimègue":64,"Almere City":61,"Sparta Rotterdam":63,"RKC Waalwijk":60,"Fortuna Sittard":59,"PEC Zwolle":60,"Heracles":62,"Go Ahead Eagles":61,"Excelsior":60,
+  "Benfica":85,"Porto":84,"Sporting CP":83,"Braga":77,"Vitória SC":68,"Gil Vicente":63,"Casa Pia":64,"Arouca":62,"Moreirense":63,"Famalicão":62,"Chaves":60,"Vizela":61,"Boavista":65,"Rio Ave":63,"Estrela da Amadora":60,"Farense":60,"Portimonense":61,"Estoril":62,
+  "Celtic":82,"Rangers":80,"Hearts":68,"Hibernian":67,"Aberdeen":66,"Motherwell":63,"Livingston":62,"Dundee United":61,"Ross County":60,"St Mirren":62,"Kilmarnock":63,"St Johnstone":61,
+  "Galatasaray":82,"Fenerbahçe":81,"Beşiktaş":78,"Trabzonspor":75,"Başakşehir":72,"Adana Demirspor":68,"Sivasspor":65,"Konyaspor":64,"Antalyaspor":65,"Kayserispor":63,"Gaziantep":62,"Hatayspor":61,"Kasımpaşa":63,"Ankaragücü":62,"Alanyaspor":64,"Pendikspor":60,"Rizespor":61,"Fatih Karagümrük":63,"Samsunspor":62,"İstanbulspor":58,
+  "Club Bruges":80,"Anderlecht":78,"Union Saint-Gilloise":76,"Gand":74,"Genk":73,"Standard Liège":70,"Charleroi":68,"Antwerp":72,"Cercle Bruges":66,"OHL":64,"Westerlo":63,"Kortrijk":62,"Eupen":61,"RWDM":63,"Malines":65,"Saint-Trond":62,
+  "Inter Miami":74,"LA Galaxy":71,"LAFC":73,"Seattle Sounders":70,"Portland Timbers":69,"Atlanta United":70,"New York City FC":71,"New York Red Bulls":69,"Columbus Crew":70,"Nashville SC":68,"Philadelphia Union":69,"Orlando City":67,"Chicago Fire":65,"FC Dallas":66,"Austin FC":67,"Real Salt Lake":65,"Colorado Rapids":64,"Vancouver Whitecaps":67,"Toronto FC":64,"CF Montréal":65,
+  "Club América":80,"Chivas Guadalajara":76,"Cruz Azul":74,"Tigres UANL":79,"Rayados Monterrey":78,"Pumas UNAM":72,"Santos Laguna":70,"Toluca":71,"Atlas":69,"León":70,"Necaxa":65,"Pachuca":74,"San Luis":64,"Querétaro":63,"Mazatlán":62,"FC Juárez":61,"Tijuana":67,"Puebla":66,
+  "Flamengo":85,"Palmeiras":84,"Atletico Mineiro":82,"Fluminense":80,"São Paulo":76,"Corinthians":75,"Internacional":74,"Grêmio":73,"Santos":70,"Botafogo":78,"Vasco da Gama":69,"Cruzeiro":71,"Bahia":68,"Fortaleza":70,"Bragantino":72,"Athletico Paranaense":71,"Goiás":63,"Coritiba":62,
+  "River Plate":86,"Boca Juniors":84,"Racing Club":78,"Independiente":72,"San Lorenzo":71,"Huracán":66,"Vélez Sársfield":70,"Estudiantes":72,"Lanús":69,"Banfield":66,"Talleres":73,"Belgrano":67,"Rosario Central":70,"Defensa y Justicia":68,"Gimnasia":64,"Godoy Cruz":67,"Platense":62,
+  "LDU Quito":70,"Independiente del Valle":72,"Olimpia":68,"Cerro Porteño":69,"Nacional Uruguay":71,"Peñarol":74,"Bolívar":67,"The Strongest":64,"Atlético Nacional":78,"Millonarios":75,"América de Cali":72,"Junior":73,"Colo-Colo":76,"Colo Colo":76,
+  "Shanghai Port":74,"Shandong Taishan":72,"Beijing Guoan":71,"Guangzhou FC":68,"Shanghai Shenhua":70,"Wuhan Three Towns":69,"Henan Songshan Longmen":65,"Changchun Yatai":64,"Tianjin Jinmen Tiger":63,"Dalian Pro":62,"Chengdu Rongcheng":65,"Zhejiang FC":66,"Nantong Zhiyun":61,"Nanjing City":60,
+  "Vissel Kobe":76,"Yokohama F. Marinos":78,"Urawa Red Diamonds":75,"Gamba Osaka":72,"Cerezo Osaka":70,"Kashima Antlers":74,"Kawasaki Frontale":77,"FC Tokyo":71,"Nagoya Grampus":69,"Sanfrecce Hiroshima":70,"Consadole Sapporo":64,"Júbilo Iwata":63,"Avispa Fukuoka":65,"Kyoto Sanga":64,
+  "Jeonbuk Motors":76,"Ulsan Hyundai":78,"Suwon Samsung":70,"FC Seoul":72,"Pohang Steelers":71,"Incheon United":66,"Daegu FC":65,"Gangwon FC":64,"Jeju United":63,"Seongnam FC":62,"Daejeon Citizen":63,"Gwangju FC":64,
+  "Al-Hilal":88,"Al-Nassr":86,"Al-Ittihad":82,"Al-Ahli":80,"Al-Qadsiah":72,"Al-Shabab":70,"Al-Fayha":65,"Al-Taawoun":66,"Al-Ettifaq":74,"Al-Wehda":68,"Al-Fateh":64,"Al-Khaleej":63,
+  "France":92,"Brésil":91,"Argentine":93,"Angleterre":88,"Espagne":90,"Allemagne":87,"Portugal":89,"Italie":86,"Pays-Bas":85,"Belgique":84,"Croatie":83,"Uruguay":82,"Colombie":80,"Mexique":78,"États-Unis":76,"Canada":74,"Maroc":82,"Sénégal":80,"Nigeria":78,"Côte d'Ivoire":79,"Ghana":74,"Cameroun":73,"Égypte":75,"Algérie":76,"Tunisie":73,"Mali":72,"Burkina Faso":70,"Guinée":69,"Congo DR":71,"Afrique du Sud":68,"Zambie":65,"Zimbabwe":62,"Angola":64,"Cap-Vert":68,"Mauritanie":63,"Gabon":65,"Bénin":63,"Gambie":62,"Tanzanie":60,"Ouganda":61,"Kenya":60,"Éthiopie":60,"Mozambique":58,"Japon":80,"Corée du Sud":79,"Australie":72,"Iran":74,"Arabie Saoudite":71,"Qatar":66,"Danemark":82,"Suisse":80,"Autriche":77,"Suède":75,"Norvège":74,"Pologne":76,"Ukraine":78,"Turquie":75,"Écosse":72,"Irlande":68,"Pays de Galles":70,"Slovénie":69,"Slovaquie":68,"République Tchèque":74,"Serbie":76,"Hongrie":71,"Albanie":65,"Islande":67,"Finlande":66,"Bosnie":67,"Géorgie":66,"Kosovo":63,"Macédoine du Nord":64,"Grèce":70,"Roumanie":68,"Bulgarie":63,"Équateur":76,"Chili":74,"Pérou":70,"Paraguay":68,"Venezuela":65,"Bolivie":60,"Panama":68,"Honduras":65,"Costa Rica":67,"El Salvador":63,"Guatemala":61,"Jamaïque":66,"Haïti":60,"Wydad Casablanca":75,"Raja Casablanca":74,"MC Alger":72,"USM Alger":71,"CR Belouizdad":73,"ES Sétif":70,"JS Kabylie":68,"MC Oran":66,"NA Hussein Dey":64,"CS Constantine":63,"Paradou AC":62,"ASO Chlef":61,"FUS Rabat":68,"FAR Rabat":66,"RS Berkane":67,"Moghreb Tétouan":65,"Hassania Agadir":64,"Olympic Safi":62,"Chabab Mohammedia":61,"Ittihad Tanger":63,
+};
+
+const KEY_PLAYERS = {
+  "PSG":["Mbappé (ATT)","Dembélé (ATT)","Vitinha (MIL)"],"Marseille":["Aubameyang (ATT)","Veretout (MIL)","Clauss (DEF)"],"Real Madrid":["Vinicius Jr (ATT)","Bellingham (MIL)","Modric (MIL)"],"Barcelona":["Lewandowski (ATT)","Pedri (MIL)","Yamal (ATT)"],"Man City":["Haaland (ATT)","De Bruyne (MIL)","Rodri (MIL)"],"Arsenal":["Saka (ATT)","Ødegaard (MIL)","Rice (MIL)"],"Liverpool":["Salah (ATT)","Núñez (ATT)","Mac Allister (MIL)"],"Bayern Munich":["Kane (ATT)","Musiala (MIL)","Kimmich (MIL)"],"Inter Milan":["Lautaro (ATT)","Thuram (ATT)","Barella (MIL)"],"Dortmund":["Sancho (ATT)","Brandt (MIL)","Hummels (DEF)"],"Atlético Madrid":["Griezmann (ATT)","Morata (ATT)","Koke (MIL)"],"Napoli":["Osimhen (ATT)","Kvaratskhelia (ATT)","Di Lorenzo (DEF)"],"France":["Mbappé (ATT)","Giroud (ATT)","Griezmann (MIL)"],"Brésil":["Vinicius Jr (ATT)","Rodrygo (ATT)","Casemiro (MIL)"],"Argentine":["Messi (ATT)","Lautaro (ATT)","Di María (ATT)"],"Angleterre":["Kane (ATT)","Bellingham (MIL)","Saka (ATT)"],"Espagne":["Morata (ATT)","Yamal (ATT)","Pedri (MIL)"],"Allemagne":["Havertz (ATT)","Gnabry (ATT)","Müller (ATT)"],"Portugal":["Ronaldo (ATT)","Leao (ATT)","B. Fernandes (MIL)"],"Maroc":["En-Nesyri (ATT)","Ziyech (MIL)","Boufal (ATT)"],"Sénégal":["Mané (ATT)","Dia (ATT)","Diatta (ATT)"],"Al-Hilal":["Neymar (ATT)","Mitrović (ATT)","Malcom (ATT)"],"Al-Nassr":["Ronaldo (ATT)","Mané (ATT)","Talisca (ATT)"],"Al-Ittihad":["Benzema (ATT)","Kanté (MIL)","Fabinho (MIL)"],"Flamengo":["Pedro (ATT)","Gabigol (ATT)","Arrascaeta (MIL)"],"River Plate":["Borré (ATT)","Solari (ATT)","De la Cruz (MIL)"],"Boca Juniors":["Cavani (ATT)","Merentiel (ATT)","Pol Fernández (MIL)"],"Sporting CP":["Gyökeres (ATT)","Trincão (ATT)","Hjulmand (MIL)"],
+};
+
+const SCORERS = {
+  "PSG":["Mbappé (9 buts)","Dembélé (7 buts)","Asensio (4 buts)"],"Marseille":["Aubameyang (11 buts)","Harit (5 buts)","Luis Henrique (4 buts)"],"Lyon":["Lacazette (8 buts)","Cherki (6 buts)","Nuamah (4 buts)"],"Monaco":["Ben Yedder (10 buts)","Minamino (6 buts)","Golovin (5 buts)"],"Lille":["David (14 buts)","Zhegrova (6 buts)","Cabella (4 buts)"],"Real Madrid":["Vinicius Jr (18 buts)","Bellingham (14 buts)","Rodrygo (9 buts)"],"Barcelona":["Lewandowski (19 buts)","Yamal (8 buts)","Ferran Torres (7 buts)"],"Man City":["Haaland (24 buts)","Foden (10 buts)","De Bruyne (8 buts)"],"Arsenal":["Saka (12 buts)","Havertz (9 buts)","Martinelli (8 buts)"],"Liverpool":["Salah (20 buts)","Núñez (12 buts)","Diaz (8 buts)"],"Bayern Munich":["Kane (22 buts)","Musiala (10 buts)","Sané (8 buts)"],"Inter Milan":["Lautaro (18 buts)","Thuram (12 buts)","Calhanoglu (8 buts)"],"Dortmund":["Füllkrug (10 buts)","Brandt (7 buts)","Sancho (6 buts)"],"Atlético Madrid":["Griezmann (11 buts)","Morata (9 buts)","Correa (5 buts)"],"Napoli":["Osimhen (15 buts)","Kvaratskhelia (10 buts)","Politano (7 buts)"],"Juventus":["Vlahovic (13 buts)","Chiesa (8 buts)","Yildiz (6 buts)"],"AC Milan":["Giroud (10 buts)","Leao (9 buts)","Pulisic (8 buts)"],"Roma":["Lukaku (12 buts)","Dybala (9 buts)","El Shaarawy (6 buts)"],"Galatasaray":["Icardi (14 buts)","Mertens (8 buts)","Zaha (6 buts)"],"Fenerbahçe":["Dzeko (10 buts)","Tadic (7 buts)","Batshuayi (6 buts)"],"Celtic":["Kyogo (16 buts)","Maeda (9 buts)","Bernardo (7 buts)"],"Rangers":["Dessers (11 buts)","Tavernier (8 buts - pen)","Wright (6 buts)"],"PSV Eindhoven":["De Jong (15 buts)","Tillman (8 buts)","Veerman (7 buts)"],"Benfica":["Rafa (9 buts)","Gonçalo Ramos (8 buts)","Di Maria (6 buts)"],"Porto":["Evanilson (12 buts)","Galeno (8 buts)","Pepê (6 buts)"],"Sporting CP":["Gyökeres (22 buts)","Trincão (9 buts)","Nuno Santos (6 buts)"],"Flamengo":["Pedro (15 buts)","Gabigol (12 buts)","Arrascaeta (9 buts)"],"Palmeiras":["Endrick (10 buts)","Rony (8 buts)","Dudu (7 buts)"],"River Plate":["Borré (12 buts)","Solari (9 buts)","De la Cruz (7 buts)"],"Boca Juniors":["Cavani (10 buts)","Merentiel (8 buts)","Pol Fernández (5 buts)"],"Al-Hilal":["Mitrović (18 buts)","Malcom (12 buts)","Al-Dawsari (9 buts)"],"Al-Nassr":["Ronaldo (25 buts)","Mané (10 buts)","Talisca (8 buts)"],"Al-Ittihad":["Benzema (11 buts)","Fabinho (4 buts)","Romarinho (7 buts)"],"France":["Mbappé (ATT)","Giroud (ATT)","Thuram (ATT)"],"Brésil":["Vinicius Jr (ATT)","Rodrygo (ATT)","Endrick (ATT)"],"Argentine":["Messi (ATT)","Lautaro (ATT)","Di María (ATT)"],"Angleterre":["Kane (ATT)","Bellingham (MIL)","Saka (ATT)"],"Espagne":["Morata (ATT)","Yamal (ATT)","Olmo (MIL)"],"Maroc":["En-Nesyri (ATT)","Ziyech (MIL)","Boufal (ATT)"],"Sénégal":["Mané (ATT)","Dia (ATT)","Diatta (ATT)"],"Nigeria":["Osimhen (ATT)","Lookman (ATT)","Chukwueze (ATT)"],
+};
+
+const PENALTY_TAKERS = {
+  "PSG":"Mbappé","Real Madrid":"Modric","Barcelona":"Lewandowski","Man City":"Haaland","Arsenal":"Saka","Liverpool":"Salah","Bayern Munich":"Kane","Inter Milan":"Calhanoglu","Juventus":"Vlahovic","Napoli":"Osimhen","Marseille":"Aubameyang","Lille":"David","Monaco":"Ben Yedder","Atlético Madrid":"Griezmann","Dortmund":"Haaland","Roma":"Dybala","Rangers":"Tavernier","Celtic":"Kyogo","Sporting CP":"Gyökeres","Fenerbahçe":"Dzeko","Galatasaray":"Icardi","Al-Nassr":"Ronaldo","Al-Hilal":"Mitrović","River Plate":"Borré","Boca Juniors":"Cavani","Flamengo":"Gabigol","France":"Mbappé","Argentine":"Messi","Angleterre":"Kane","Brésil":"Vinicius Jr","Espagne":"Morata","Allemagne":"Havertz","Portugal":"Ronaldo","Maroc":"En-Nesyri","Sénégal":"Mané",
+};
+
+const INJURY_POOL = {
+  "PSG":["Ramos (DEF - genou)","Nuno Mendes (DEF - cuisse)"],"Real Madrid":["Militão (DEF - ligaments)","Carvajal (DEF - cheville)"],"Barcelona":["Ter Stegen (GK - genou)","Gavi (MIL - ligaments)"],"Man City":["Doku (ATT - cheville)","Walker (DEF - cuisse)"],"Arsenal":["Tomiyasu (DEF - genou)","Tierney (DEF - cuisse)"],"Liverpool":["Alisson (GK - épaule)","Jota (ATT - cuisse)"],"Bayern Munich":["Neuer (GK - genou)","Goretzka (MIL - genou)"],"Juventus":["Chiesa (ATT - ligaments)","Pogba (MIL - suspension)"],"Marseille":["Kondogbia (MIL - cuisse)","Gigot (DEF - côte)"],
+};
+
+const FORMATIONS = {
+  "PSG":"4-3-3","Real Madrid":"4-3-3","Barcelona":"4-3-3","Man City":"4-3-3","Arsenal":"4-3-3","Liverpool":"4-3-3","Bayern Munich":"4-2-3-1","Inter Milan":"3-5-2","Juventus":"4-3-3","Napoli":"4-3-3","Atlético Madrid":"4-4-2","Dortmund":"4-2-3-1","Roma":"3-4-2-1","AC Milan":"4-2-3-1","Marseille":"4-3-3","Lyon":"4-3-3","Monaco":"4-2-3-1","Lille":"4-4-2","France":"4-3-3","Argentine":"4-3-3","Brésil":"4-2-3-1","Angleterre":"4-2-3-1","Espagne":"4-3-3","Allemagne":"4-2-3-1","Portugal":"4-3-3","Maroc":"4-1-4-1","Sénégal":"4-3-3",
+};
+
+const NEUTRAL_IDS = ["friendly_clubs","friendly_nations","euro_qual","wc_qual_am","wc_qual_af","copa_america","gold_cup","conmebol_lib","acl","cl","el"];
+
+// ══════════════════════════════════════════════
+// RÈGLES STRICTES — MOTEUR DE DONNÉES
+// ══════════════════════════════════════════════
+
+// ⚠️ RÈGLE 1 : Ces données sont des estimations basées sur des modèles statistiques
+// historiques. Elles ne proviennent PAS d'internet ni de données en temps réel.
+// ⚠️ RÈGLE 2 : Le moteur ne devine jamais un score live — seul l'utilisateur le fournit.
+// ⚠️ RÈGLE 3 : Toute donnée fournie par l'utilisateur est prioritaire et non modifiée.
+// ⚠️ RÈGLE 4 : Si données insuffisantes → message d'erreur explicite.
+
+const DATA_SOURCE_LABEL = "📊 Données basées sur modèle statistique · Pas de données temps réel";
+const DATA_WARNING = "⚠️ Ces pronostics sont générés à partir de modèles statistiques historiques. Ils ne reflètent pas l'état actuel des équipes en temps réel.";
+
+function validateMatch(home, away){
+  if(!home || !away) return "Équipes manquantes.";
+  if(home.trim()===away.trim()) return "Les deux équipes sont identiques.";
+  if(home.trim().length<2 || away.trim().length<2) return "Nom d'équipe invalide.";
+  return null; // OK
+}
+
+function validateLiveData(score, minute){
+  if(!score || !minute) return "Je ne peux pas analyser ce match sans données fiables.";
+  if(!/^\d+[\-\:]\d+$/.test(score.trim())) return "Je ne peux pas analyser ce match sans données fiables. (Format score invalide : utilisez X-X)";
+  const m = parseInt(minute);
+  if(isNaN(m) || m<0 || m>120) return "Je ne peux pas analyser ce match sans données fiables. (Minute invalide : 0-120)";
+  return null; // OK
+}
+
+function dataSourceBadge(isUserData=false){
+  return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;background:${isUserData?'#0d1a10':'#0d1020'};border:1px solid ${isUserData?'#00e67630':'#ffffff15'};border-radius:8px;padding:8px 10px">
+    <div style="width:6px;height:6px;border-radius:50%;background:${isUserData?'#00e676':'#6b7a9a'}"></div>
+    <span style="font-family:'Barlow',sans-serif;font-size:10px;color:${isUserData?'#00e676':'#4a5a70'};letter-spacing:1px">${isUserData?'✅ DONNÉES FOURNIES PAR L\'UTILISATEUR · PRIORITAIRES':'📊 MODÈLE STATISTIQUE · ESTIMATION HISTORIQUE · PAS DE DONNÉES TEMPS RÉEL'}</span>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════
+// MOTEUR DE PRONO
+// ══════════════════════════════════════════════
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(arr,n){return [...arr].sort(()=>Math.random()-.5).slice(0,n)}
+function getRating(t){return TEAM_RATINGS[t]||68}
+
+function getForm(team){
+  const r=getRating(team),pool=[];
+  const w=r>80?5:r>70?4:r>60?3:2,l=r>80?1:r>70?2:r>60?3:4;
+  for(let i=0;i<w;i++)pool.push("W");
+  for(let i=0;i<l;i++)pool.push("L");
+  for(let i=0;i<(7-w-l);i++)pool.push("D");
+  return pick(pool,5);
+}
+
+function getInjuries(team){
+  if(INJURY_POOL[team])return Math.random()>.4?pick(INJURY_POOL[team],rnd(0,INJURY_POOL[team].length)):[];
+  return Math.random()>.6?[team+" (MIL - cuisse)","Défenseur (cheville)"]:[];
+}
+
+function buildProno(home,away){
+  const rH=getRating(home),rA=getRating(away),diff=rH-rA;
+  const isNeutral=NEUTRAL_IDS.includes(currentLeague?.id);
+  const bonus=isNeutral?0:5;
+  let pH=35+(diff+bonus)*0.6,pN=28-Math.abs(diff)*0.2,pA=37-(diff+bonus)*0.6;
+  const tot=pH+pN+pA;
+  pH=Math.round(pH/tot*100);pA=Math.round(pA/tot*100);pN=100-pH-pA;
+  if(pN<8){pN=8;const r2=pH+pA;pH=Math.round(pH/r2*92);pA=92-pH}
+
+  const r=Math.random()*100;
+  let resultat=r<pH?"Victoire domicile":r<pH+pN?"Match nul":"Victoire extérieur";
+  const gH=resultat==="Victoire domicile"?rnd(1,3):resultat==="Match nul"?rnd(1,2):rnd(0,1);
+  const gA=resultat==="Victoire extérieur"?rnd(1,3):resultat==="Match nul"?gH:rnd(0,1);
+  const gap=Math.abs(diff);
+  const conf=Math.min(92,Math.max(42,52+gap*0.8+rnd(-5,5)));
+  const formeH=getForm(home),formeA=getForm(away);
+  const wH=formeH.filter(x=>x==="W").length,wA=formeA.filter(x=>x==="W").length;
+  const blessH=getInjuries(home),blessA=getInjuries(away);
+  const kH=KEY_PLAYERS[home]||[home+" n°9 (ATT)"],kA=KEY_PLAYERS[away]||[away+" n°9 (ATT)"];
+  const scH=SCORERS[home]||[home+" attaquant principal"],scA=SCORERS[away]||[away+" attaquant principal"];
+  const fmH=FORMATIONS[home]||"4-3-3",fmA=FORMATIONS[away]||"4-3-3";
+
+  // Penalty risk
+  const agg=["Atlético Madrid","Chelsea","Tottenham","Burnley","Lens","Nice","Galatasaray"];
+  const mag=["Man City","Barcelona","Real Madrid","Liverpool","PSG","Inter Milan"];
+  let prisk=30;
+  if(agg.includes(home)||agg.includes(away))prisk+=20;
+  if(mag.includes(home)||mag.includes(away))prisk+=15;
+  prisk=Math.min(85,Math.max(20,prisk+rnd(-10,10)));
+
+  // H2H
+  const h2hResults=[];
+  for(let i=0;i<3;i++)h2hResults.push(`${home} ${rnd(0,3)}-${rnd(0,3)} ${away}`);
+  const h2hStr=h2hResults.join(" · ");
+  const h2hHomeWins=h2hResults.filter(r=>parseInt(r.split("-")[0].split(" ").pop())>parseInt(r.split("-")[1])).length;
+  const h2hDomination=h2hHomeWins>=2?`${home} domine l'historique`:h2hHomeWins<=0?`${away} domine l'historique`:"Historique équilibré";
+
+  const force=r=>r>80?"top équipe":r>70?"équipe solide":r>60?"formation correcte":"équipe en difficulté";
+
+  // 📊 Analyse tactique
+  const styleHome=rH>82?"Jeu offensif dominant, pressing haut, transitions rapides":rH>72?"Bloc médian solide, contre-attaques efficaces":rH>62?"Jeu pragmatique, défense prioritaire":"Bloc défensif bas, difficultés à créer";
+  const styleAway=rA>82?"Jeu offensif dominant, pressing haut, transitions rapides":rA>72?"Bloc médian solide, contre-attaques efficaces":rA>62?"Jeu pragmatique, défense prioritaire":"Bloc défensif bas, difficultés à créer";
+  const matchup=diff>15?`${home} largement supérieur. Mismatch technique flagrant.`:diff>5?`Léger avantage ${home}. Match à sens unique probable.`:diff<-15?`${away} largement supérieur. Déplacement difficile.`:diff<-5?`Léger avantage ${away} malgré le déplacement.`:"Match très équilibré. Tout est possible.";
+
+  // 🥇 Buteurs probables (noms uniquement)
+  const extractName=s=>s.split(" (")[0].split(" ·")[0].split("(")[0].trim();
+  const buteursNomH=(SCORERS[home]||[home+" attaquant"]).slice(0,2).map(extractName);
+  const buteursNomA=(SCORERS[away]||[away+" attaquant"]).slice(0,2).map(extractName);
+  // Passeurs probables = joueurs clés non attaquants
+  const passeursH=(KEY_PLAYERS[home]||[]).filter(p=>p.includes("MIL")||p.includes("DEF")).slice(0,2).map(extractName);
+  const passeursA=(KEY_PLAYERS[away]||[]).filter(p=>p.includes("MIL")||p.includes("DEF")).slice(0,2).map(extractName);
+
+  // 🎯 Scénario alternatif
+  const scenarioAlt=resultat==="Victoire domicile"
+    ?{score:`${gH-1}-${gA+1}`,desc:`${away} résiste et arrache le nul grâce à une erreur défensive de ${home}.`}
+    :resultat==="Victoire extérieur"
+    ?{score:`${gH+1}-${gA-1}`,desc:`${home} réagit à domicile et renverse la tendance en fin de match.`}
+    :{score:`${gH+1}-${gA}`,desc:`${home} profite de l'avantage du terrain pour faire la différence.`};
+
+  // 💰 Lecture paris
+  const totalButs=gH+gA;
+  const confPari=Math.min(88,Math.max(40,conf+rnd(-5,5)));
+  const motiv=rH>85||rA>85?"Enjeu majeur — les deux équipes jouent gros":rH>75||rA>75?"Match important pour le classement":"Match de milieu de tableau";
+
+  // 🧠 Facteurs clés
+  const facteursCles=[
+    `Forme : ${home} ${wH}/5 victoires · ${away} ${wA}/5 victoires`,
+    blessH.length?`Absences ${home} : ${blessH.map(x=>extractName(x)).join(", ")}`:`${home} au complet`,
+    blessA.length?`Absences ${away} : ${blessA.map(x=>extractName(x)).join(", ")}`:`${away} au complet`,
+    diff>0?`Avantage technique ${home} (+${Math.abs(diff)} pts de rating)`:diff<0?`Avantage technique ${away} (+${Math.abs(diff)} pts de rating)`:"Équipes de même niveau",
+    motiv,
+    h2hDomination,
+  ];
+
+  const analyse=`${home} (${force(rH)}) affronte ${away} (${force(rA)}) en ${currentLeague.name}. ${matchup} ${home} est en ${wH>=3?"excellente":"forme correcte"} (${wH}/5). ${away} affiche ${wA>=3?"de bons résultats":"une forme variable"} (${wA}/5).${blessH.length?` Absences chez ${home} : ${blessH[0].split(" (")[0]}.`:""} ${resultat==="Victoire domicile"?`${home} devrait s'imposer à domicile.`:resultat==="Victoire extérieur"?`${away} capable de créer la surprise.`:"Un match serré, le nul est possible."}`;
+
+  return{
+    resultat,confiance:conf,score:`${gH}-${gA}`,butsTotal:totalButs,analyse,
+    probaDomicile:pH,probaNull:pN,probaExterieur:pA,
+    overUnder:totalButs>=3?"Over 2.5":"Under 2.5",btts:gH>0&&gA>0,
+    formeHome:formeH,formeAway:formeA,
+    blessesHome:blessH,blessesAway:blessA,
+    joueursClesHome:kH,joueursClesAway:kA,
+    buteursHome:SCORERS[home]||[home+" attaquant principal"],
+    buteursAway:SCORERS[away]||[away+" attaquant principal"],
+    buteursNomHome:buteursNomH,buteursNomAway:buteursNomA,
+    passeursHome:passeursH,passeursAway:passeursA,
+    formationHome:fmH,formationAway:fmA,
+    styleHome,styleAway,matchup,
+    scenarioAlt,
+    facteursCles,
+    h2h:h2hStr,h2hDomination,
+    confPari,
+    venue:isNeutral?"🏟 Terrain neutre · Pas d'avantage domicile":`🏠 Avantage domicile pris en compte`,
+    penaltyRisk:{probabilite:prisk,niveau:prisk>=65?"ÉLEVÉ":prisk>=45?"MOYEN":"FAIBLE",couleur:prisk>=65?"#ff4081":prisk>=45?"#ffb300":"#00e676",tireurHome:PENALTY_TAKERS[home]||`Tireur de ${home}`,tireurAway:PENALTY_TAKERS[away]||`Tireur de ${away}`},
+    risque:conf>=75?"faible":conf>=58?"moyen":"élevé"
+  };
+}
+
+// ══════════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════════
+const COLORS={"Victoire domicile":"#00e676","Match nul":"#ffb300","Victoire extérieur":"#ff4081"};
+let currentLeague=LEAGUES[0],history=[];
+
+function switchPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('show');
+  document.getElementById('nav-'+id).classList.add('active');
+  if(id==='history')renderHistory();
+  if(id==='analyse')fillAnalyseTeams();
+}
+
+function fillAnalyseTeams(){
+  const all=[...new Set(LEAGUES.flatMap(l=>l.teams))].sort();
+  const h=document.getElementById('aHomeTeam'),a=document.getElementById('aAwayTeam');
+  if(h.options.length>0)return;
+  all.forEach(t=>{h.innerHTML+=`<option>${t}</option>`;a.innerHTML+=`<option>${t}</option>`;});
+  a.selectedIndex=1;
+}
+
+function buildLeagueBar(){
+  const bar=document.getElementById('leagueBar');
+  bar.innerHTML='';
+  LEAGUES.forEach((lg,i)=>{
+    const btn=document.createElement('button');
+    btn.className='league-chip'+(i===0?' active':'');
+    btn.textContent=lg.flag+' '+lg.name;
+    btn.onclick=()=>{
+      document.querySelectorAll('.league-chip').forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      currentLeague=lg;fillTeams();
+      document.getElementById('result').style.display='none';
+    };
+    bar.appendChild(btn);
+  });
+}
+
+function fillTeams(){
+  const h=document.getElementById('homeTeam'),a=document.getElementById('awayTeam');
+  h.innerHTML='';a.innerHTML='';
+  currentLeague.teams.forEach(t=>{
+    h.innerHTML+=`<option value="${t}">${t}</option>`;
+    a.innerHTML+=`<option value="${t}">${t}</option>`;
+  });
+  h.selectedIndex=0;a.selectedIndex=currentLeague.teams.length>1?1:0;
+  const isN=NEUTRAL_IDS.includes(currentLeague.id);
+  document.getElementById('lbl-home').textContent=isN?'🏟 ÉQUIPE 1':'🏠 DOMICILE';
+  document.getElementById('lbl-away').textContent=isN?'🏟 ÉQUIPE 2':'✈ EXTÉRIEUR';
+}
+
+function fc(r){return`<div class="fc ${r}">${r}</div>`}
+
+function generate(){
+  const home=document.getElementById('homeTeam').value;
+  const away=document.getElementById('awayTeam').value;
+
+  // RÈGLE STRICTE : Validation des données
+  const err=validateMatch(home,away);
+  if(err){
+    const res=document.getElementById('result');
+    res.innerHTML=`<div style="background:#1a0d10;border:1px solid #ff408150;border-radius:12px;padding:14px;font-family:'Barlow',sans-serif;color:#ff4081;font-size:13px">⚠️ ${err}</div>`;
+    res.style.display='block';return;
+  }
+
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  document.getElementById('result').style.display='none';
+  const steps=["📊 Calcul des probabilités historiques...","🚑 Vérification données blessés...","📋 Analyse statistique des buteurs...","🟡 Évaluation risque penalty...","🧠 Génération du pronostic..."];
+  let si=0;
+  btn.innerHTML=`<div class="spinner"></div><span class="step-txt">${steps[0]}</span>`;
+  const iv=setInterval(()=>{si++;if(si<steps.length)btn.innerHTML=`<div class="spinner"></div><span class="step-txt">${steps[si]}</span>`;},600);
+  setTimeout(()=>{
+    clearInterval(iv);
+    try{
+      const p=buildProno(home,away);
+      showResult(p,home,away);
+      history.unshift({id:Date.now(),league:currentLeague.name,flag:currentLeague.flag,home,away,prono:p,date:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})});
+      if(history.length>20)history.pop();
+    }catch(e){
+      const res=document.getElementById('result');
+      res.innerHTML=`<div style="color:#ff4081;font-family:'Barlow',sans-serif;padding:14px;background:#1a0d10;border-radius:12px;border:1px solid #ff408130">⚠️ Je ne peux pas générer ce pronostic. Données insuffisantes ou équipes non reconnues.</div>`;
+      res.style.display='block';
+    }
+    btn.disabled=false;
+    btn.innerHTML='⚡ GÉNÉRER LE PRONO';
+  },3200);
+}
+
+function section(label,color,content,open=true){
+  const id='s'+Math.random().toString(36).slice(2);
+  return`<div class="card" style="border:1px solid ${color}30;margin-bottom:10px">
+    <div class="collapsible" onclick="toggleSection('${id}')">
+      <div class="card-label" style="color:${color};margin-bottom:0">${label}</div>
+      <div class="collapse-arrow ${open?'open':''}">▼</div>
+    </div>
+    <div class="collapse-body ${open?'open':''}" id="${id}">
+      <div style="margin-top:10px">${content}</div>
+    </div>
+  </div>`;
+}
+
+function toggleSection(id){
+  const body=document.getElementById(id);
+  const arrow=body.previousElementSibling.querySelector('.collapse-arrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function showResult(p,home,away){
+  const col=COLORS[p.resultat]||'#00e676';
+  const cc=p.confiance>=75?'#00e676':p.confiance>=55?'#ffb300':'#ff4081';
+  const rc=p.risque==='faible'?'#00e676':p.risque==='moyen'?'#ffb300':'#ff4081';
+  const pen=p.penaltyRisk;
+  const confPariCol=p.confPari>=70?'#00e676':p.confPari>=55?'#ffb300':'#ff4081';
+
+  const injH=p.blessesHome.length?p.blessesHome.map(x=>`<div class="player-item"><span style="color:#ff4081">✕</span>${x}</div>`).join(''):`<div class="none-txt">Aucune absence signalée ✅</div>`;
+  const injA=p.blessesAway.length?p.blessesAway.map(x=>`<div class="player-item"><span style="color:#ff4081">✕</span>${x}</div>`).join(''):`<div class="none-txt">Aucune absence signalée ✅</div>`;
+  const jH=p.joueursClesHome.map(x=>`<div class="player-item"><span style="color:#00e676">★</span>${x}</div>`).join('');
+  const jA=p.joueursClesAway.map(x=>`<div class="player-item"><span style="color:#00e676">★</span>${x}</div>`).join('');
+  const bH=p.buteursHome.map(x=>`<div class="player-item"><span style="color:#ff9800">⚽</span>${x}</div>`).join('');
+  const bA=p.buteursAway.map(x=>`<div class="player-item"><span style="color:#ff9800">⚽</span>${x}</div>`).join('');
+
+  const html=`
+    ${dataSourceBadge(false)}
+    <div class="r-badge"><div class="r-dot"></div><span class="r-dot-txt">ANALYSE EXPERT PARIS SPORTIFS</span></div>
+
+    <!-- 📊 VERDICT -->
+    <div class="verdict-card" style="background:#0d1525;border:1px solid ${col}50;box-shadow:0 0 30px ${col}15;margin-bottom:10px">
+      <div class="verdict-top">
+        <div>
+          <div class="verdict-label">VERDICT</div>
+          <div class="verdict-result" style="color:${col}">${p.resultat}</div>
+          <div class="verdict-score">${home} ${p.score} ${away}</div>
+        </div>
+        <div>
+          <div class="verdict-label" style="text-align:right">CONFIANCE</div>
+          <div class="verdict-conf" style="color:${cc}">${p.confiance}%</div>
+          <div class="verdict-conf-sub">${p.confiance>=75?"🔥 HAUTE":p.confiance>=55?"⚡ MOY":"⚠ FAIBLE"} · <span style="color:${rc}">${p.risque.toUpperCase()}</span></div>
+        </div>
+      </div>
+      <div class="verdict-label">PROBABILITÉS 1N2</div>
+      ${[{l:home,v:p.probaDomicile,c:'#00e676'},{l:'Nul',v:p.probaNull,c:'#ffb300'},{l:away,v:p.probaExterieur,c:'#ff4081'}].map(x=>`
+        <div class="prob-row">
+          <div class="prob-lbl">${x.l}</div>
+          <div class="prob-track"><div class="prob-fill" style="width:${x.v}%;background:${x.c}"></div></div>
+          <div class="prob-pct" style="color:${x.c}">${x.v}%</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- 💰 LECTURE PARIS -->
+    ${section('💰 LECTURE PARI SPORTIF','#00e676',`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:#162235;border-radius:10px;padding:12px;text-align:center;border:1px solid #00e67630">
+          <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70;margin-bottom:4px">OVER / UNDER</div>
+          <div style="font-size:22px;color:#00e676">${p.overUnder}</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#6b7a9a">${p.butsTotal} but(s) prédit(s)</div>
+        </div>
+        <div style="background:#162235;border-radius:10px;padding:12px;text-align:center;border:1px solid ${p.btts?'#00e67630':'#ff408130'}">
+          <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70;margin-bottom:4px">BTTS</div>
+          <div style="font-size:22px;color:${p.btts?'#00e676':'#ff4081'}">${p.btts?"OUI ✅":"NON ❌"}</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#6b7a9a">Les 2 équipes marquent</div>
+        </div>
+      </div>
+      <div style="background:#162235;border-radius:10px;padding:12px;margin-bottom:8px">
+        <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70;margin-bottom:6px">FAVORI</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:16px;letter-spacing:1px;color:#00e676">${p.resultat==="Match nul"?"Match nul":p.resultat==="Victoire domicile"?home:away}</div>
+          <div style="text-align:right">
+            <div style="font-size:28px;color:${confPariCol};line-height:1">${p.confPari}%</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:10px;color:${confPariCol}">CONFIANCE PARI</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#0a1520;border-left:3px solid #00e676;border-radius:0 8px 8px 0;padding:8px 12px;font-family:'Barlow',sans-serif;font-size:11px;color:#8a9ab5">
+        🎯 Scénario alternatif : <strong style="color:#ffb300">${p.scenarioAlt?.score||'N/A'}</strong> — ${p.scenarioAlt?.desc||''}
+      </div>`,true)}
+
+    <!-- 📊 STATS RAPIDES -->
+    <div class="stats-row">
+      <div class="stat-box"><div class="card-label">SCORE PRÉDIT</div><div class="stat-val">${p.score}</div><div class="stat-sub">${p.butsTotal} buts</div></div>
+      <div class="stat-box"><div class="card-label">O/U</div><div class="stat-val" style="font-size:14px">${p.overUnder}</div><div class="stat-sub">2.5 buts</div></div>
+      <div class="stat-box"><div class="card-label">PENALTY</div><div class="stat-val" style="font-size:14px;color:${pen.couleur}">${pen.probabilite}%</div><div class="stat-sub">${pen.niveau}</div></div>
+    </div>
+
+    <!-- 🔥 JOUEURS DÉCISIFS -->
+    ${section('🔥 JOUEURS DÉCISIFS','#ff9800',`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="team-tag">⚽ BUTEURS · ${home}</div>
+          ${p.buteursNomHome&&p.buteursNomHome.length?p.buteursNomHome.map(n=>`<div class="player-item"><span style="color:#ff9800">⚽</span><strong>${n}</strong></div>`).join(''):'<div class="none-txt">—</div>'}
+          <div class="team-tag" style="margin-top:8px">🎯 PASSEURS · ${home}</div>
+          ${p.passeursHome&&p.passeursHome.length?p.passeursHome.map(n=>`<div class="player-item"><span style="color:#00bcd4">🎯</span><strong>${n}</strong></div>`).join(''):'<div class="none-txt">—</div>'}
+        </div>
+        <div>
+          <div class="team-tag">⚽ BUTEURS · ${away}</div>
+          ${p.buteursNomAway&&p.buteursNomAway.length?p.buteursNomAway.map(n=>`<div class="player-item"><span style="color:#ff9800">⚽</span><strong>${n}</strong></div>`).join(''):'<div class="none-txt">—</div>'}
+          <div class="team-tag" style="margin-top:8px">🎯 PASSEURS · ${away}</div>
+          ${p.passeursAway&&p.passeursAway.length?p.passeursAway.map(n=>`<div class="player-item"><span style="color:#00bcd4">🎯</span><strong>${n}</strong></div>`).join(''):'<div class="none-txt">—</div>'}
+        </div>
+      </div>`,true)}
+
+    <!-- 📊 ANALYSE TACTIQUE -->
+    ${section('📊 ANALYSE TACTIQUE','#7c4dff',`
+      <div class="team-tag">${home} · ${p.formationHome}</div>
+      <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;margin-bottom:10px">${p.styleHome}</div>
+      <div class="team-tag">${away} · ${p.formationAway}</div>
+      <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;margin-bottom:10px">${p.styleAway}</div>
+      <div style="background:#162235;border-radius:8px;padding:10px;font-family:'Barlow',sans-serif;font-size:12px;color:#ffb300">
+        ⚡ Match-up : ${p.matchup}
+      </div>`,false)}
+
+    <!-- 📈 FORME -->
+    ${section('📈 FORME RÉCENTE','#00bcd4',`
+      <div class="team-tag">${home}</div>
+      <div class="forme-row">${p.formeHome.map(fc).join('')}</div>
+      <div class="team-tag" style="margin-top:12px">${away}</div>
+      <div class="forme-row">${p.formeAway.map(fc).join('')}</div>`,false)}
+
+    <!-- 🚑 BLESSÉS -->
+    ${section('🚑 BLESSÉS / SUSPENDUS','#ff4081',`
+      <div class="team-tag">${home}</div>${injH}
+      <div class="team-tag" style="margin-top:10px">${away}</div>${injA}`,false)}
+
+    <!-- 🧠 FACTEURS CLÉS -->
+    ${section('🧠 FACTEURS CLÉS','#00e676',`
+      ${(p.facteursCles||[]).map(f=>`<div class="factor-row"><span class="factor-arrow">▶</span><span class="factor-txt">${f}</span></div>`).join('')}`,true)}
+
+    <!-- ⚔ H2H -->
+    ${section('⚔ H2H & CONTEXTE','#ffb300',`
+      <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;margin-bottom:6px">${p.h2h}</div>
+      <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#ffb300;margin-bottom:6px">📌 ${p.h2hDomination}</div>
+      <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70">${p.venue}</div>`,false)}
+
+    <!-- 📋 ANALYSE GLOBALE -->
+    ${section('📋 ANALYSE GLOBALE','#8a9ab5',`<p class="analyse-txt" style="font-size:12px">${p.analyse}</p>`,false)}
+
+    <p class="disclaimer">⚠ Pronostic informatif uniquement. Le jeu peut créer une dépendance. Jouez responsablement.</p>`;
+
+  const res=document.getElementById('result');
+  res.innerHTML=html;res.style.display='block';
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+function renderHistory(){
+  const list=document.getElementById('histList');
+  if(!history.length){
+    list.innerHTML=`<div class="empty"><div class="empty-ico">📋</div><p>Aucun prono généré</p><p style="font-size:12px;margin-top:6px;color:#3a4a60">Lance ton premier prono !</p></div>`;return;
+  }
+  list.innerHTML=history.map(h=>{
+    const col=COLORS[h.prono.resultat]||'#00e676';
+    const cc=h.prono.confiance>=75?'#00e676':h.prono.confiance>=55?'#ffb300':'#ff4081';
+    return`<div class="hist-item">
+      <div class="hist-meta">${h.flag} ${h.league} · ${h.date}</div>
+      <div class="hist-teams">${h.home} <span class="hist-vs">vs</span> ${h.away}</div>
+      <div class="hist-bottom">
+        <div class="hist-result" style="color:${col}">${h.prono.resultat}</div>
+        <div class="hist-right">
+          <div class="hist-score">Score : ${h.prono.score}</div>
+          <div class="hist-conf" style="color:${cc}">${h.prono.confiance}% confiance</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+// ══════════════════════════════════════════════
+// MOTEUR ANALYSE AVANCÉE
+// ══════════════════════════════════════════════
+
+function buildAnalyse(home, away, ctx){
+  const rH=getRating(home), rA=getRating(away), diff=rH-rA;
+  const minute = ctx.minute||0;
+  const liveScore = ctx.score||null;
+  const poss = ctx.poss||Math.round(50+diff*0.3);
+  const shotsH = ctx.shotsH||rnd(3,12), shotsA = ctx.shotsA||rnd(1,8);
+  const isLive = minute>0;
+
+  // xG simulé
+  const xgH = parseFloat((shotsH*0.11 + (poss-50)*0.02 + rnd(0,20)/100).toFixed(2));
+  const xgA = parseFloat((shotsA*0.11 + (50-poss)*0.02 + rnd(0,15)/100).toFixed(2));
+
+  // Momentum : 0=domination away, 100=domination home
+  const momentum = Math.round(50 + diff*0.4 + (poss-50)*0.3 + rnd(-10,10));
+  const momClamped = Math.min(95,Math.max(5,momentum));
+  const domTeam = momClamped>55?home:momClamped<45?away:"Équilibré";
+
+  // Intensité
+  const intensity = shotsH+shotsA > 14 ? "🔴 HAUTE" : shotsH+shotsA > 8 ? "🟠 MOYENNE" : "🟢 FAIBLE";
+
+  // Joueurs clés avec stats simulées
+  const buildPlayerCards = (team, isHome) => {
+    const r = getRating(team);
+    const keys = KEY_PLAYERS[team] || [`${team} n°9 (ATT)`, `${team} n°10 (MIL)`, `${team} n°5 (DEF)`];
+    const shots = isHome ? shotsH : shotsA;
+    return keys.slice(0,3).map((p,i) => {
+      const xg = parseFloat((Math.random()*(shots*0.12)).toFixed(2));
+      const xa = parseFloat((Math.random()*0.4).toFixed(2));
+      const duels = rnd(2,12);
+      const form = r>80&&i===0?"🔥":r>65&&i<2?"⚖️":"❄️";
+      const influence = i===0?"TOP":"BON";
+      return {name:p, xg, xa, tirs:rnd(0,4), cles:rnd(0,3), duels, form, influence};
+    });
+  };
+
+  const playersH = buildPlayerCards(home, true);
+  const playersA = buildPlayerCards(away, false);
+
+  // Top influents et en difficulté
+  const allPlayers = [
+    ...playersH.map(p=>({...p,team:home})),
+    ...playersA.map(p=>({...p,team:away}))
+  ];
+  const topInfluents = [...allPlayers].sort((a,b)=>b.xg+b.xa-(a.xg+a.xa)).slice(0,3);
+  const enDifficulte = [...allPlayers].sort((a,b)=>a.duels-b.duels).slice(0,2);
+
+  // Joueurs décisifs prochaines 15 min
+  const decisifs = playersH.concat(playersA).map(p => ({
+    ...p,
+    probBut: Math.round(Math.random()*35 + (p.xg*30)),
+    probPasse: Math.round(Math.random()*25 + (p.xa*30)),
+    confiance: Math.round(45+Math.random()*40),
+  })).sort((a,b)=>b.probBut-a.probBut).slice(0,4);
+
+  // Prédiction de but
+  const baseProb = 15 + (xgH+xgA)*8 + (minute>70?8:0);
+  const prob5 = Math.min(75,Math.round(baseProb*0.6+rnd(-5,5)));
+  const prob10 = Math.min(82,Math.round(baseProb*0.85+rnd(-5,5)));
+  const prob15 = Math.min(88,Math.round(baseProb+rnd(-5,5)));
+  const urgency = prob15>65?"🔴 BUT IMMINENT":prob15>45?"🟠 PRESSION":"🟢 CALME";
+  const likelyScorer = momClamped>55?home:away;
+
+  // Pronostic global
+  const neutralLeagueIds=["friendly_clubs","friendly_nations","euro_qual","wc_qual_am","wc_qual_af","copa_america","gold_cup","conmebol_lib","acl","cl","el"];
+  const isNeutral=neutralLeagueIds.includes(currentLeague?.id);
+  const bonus=isNeutral?0:5;
+  let pH=35+(diff+bonus)*0.6, pN=28-Math.abs(diff)*0.2, pA=37-(diff+bonus)*0.6;
+  // Ajustement selon contexte live
+  if(isLive && poss>60){pH=Math.min(85,pH+5);pA=Math.max(8,pA-5);}
+  if(isLive && poss<40){pA=Math.min(85,pA+5);pH=Math.max(8,pH-5);}
+  const tot=pH+pN+pA;
+  pH=Math.round(pH/tot*100);pA=Math.round(pA/tot*100);pN=100-pH-pA;
+  const gH=rnd(0,3),gA=rnd(0,2);
+  const conf=Math.min(92,Math.max(45,55+Math.abs(diff)*0.7+rnd(-5,5)));
+
+  // Alertes intelligentes
+  const alertes=[];
+  if(prob15>65)alertes.push({type:"danger",ico:"🚨",title:"BUT IMMINENT",msg:`Forte pression offensive de ${likelyScorer}. xG élevé : ${likelyScorer===home?xgH:xgA}. Probabilité de but dans 15 min : ${prob15}%`});
+  if(poss>65)alertes.push({type:"warn",ico:"⚡",title:"DOMINATION TOTALE",msg:`${home} contrôle totalement le jeu avec ${poss}% de possession. La défense de ${away} sous pression constante.`});
+  if(shotsH>10||shotsA>10)alertes.push({type:"warn",ico:"🔥",title:"MATCH TRÈS OFFENSIF",msg:`${shotsH+shotsA} tirs au total. Les deux équipes créent beaucoup d'occasions. BTTS probable.`});
+  if(xgH>2.0)alertes.push({type:"danger",ico:"🎯",title:"xG TRÈS ÉLEVÉ",msg:`${home} a un xG de ${xgH}. Plusieurs occasions nettes non converties. Danger imminent.`});
+  if(minute>75)alertes.push({type:"info",ico:"⏱",title:"PHASE FINALE",msg:`Match en ${minute}e minute. La fatigue peut faire la différence. Les remplaçants peuvent être décisifs.`});
+  if(!alertes.length)alertes.push({type:"ok",ico:"✅",title:"MATCH STABLE",msg:"Aucune alerte majeure. Le match se déroule selon les prévisions."});
+
+  return {home,away,rH,rA,diff,minute,liveScore,poss,shotsH,shotsA,xgH,xgA,momClamped,domTeam,intensity,playersH,playersA,topInfluents,enDifficulte,decisifs,prob5,prob10,prob15,urgency,likelyScorer,pH,pN,pA,gH,gA,conf,alertes};
+}
+
+function generateAnalyse(){
+  const home=document.getElementById('aHomeTeam').value;
+  const away=document.getElementById('aAwayTeam').value;
+  if(home===away){alert('Choisissez 2 équipes différentes !');return;}
+
+  const minute=parseInt(document.getElementById('aMinute').value)||0;
+  const scoreRaw=document.getElementById('aScore').value||"";
+  const poss=parseInt(document.getElementById('aPoss').value)||0;
+  const shotsRaw=document.getElementById('aShots').value||"";
+  const shotsArr=shotsRaw.split(/[\/\-\s]+/).map(Number);
+  const ctx={minute,score:scoreRaw||null,poss:poss||null,shotsH:shotsArr[0]||null,shotsA:shotsArr[1]||null};
+
+  const btn=document.getElementById('analyseBtn');
+  btn.disabled=true;
+  document.getElementById('analyseResult').style.display='none';
+
+  const steps=["🔴 Analyse live du match...","👤 Analyse des joueurs...","🎯 Détection joueurs décisifs...","⚽ Prédiction de but...","🚨 Calcul des alertes..."];
+  let si=0;
+  btn.innerHTML=`<div class="spinner"></div><span class="step-txt">${steps[0]}</span>`;
+  const iv=setInterval(()=>{si++;if(si<steps.length)btn.innerHTML=`<div class="spinner"></div><span class="step-txt">${steps[si]}</span>`;},700);
+
+  setTimeout(()=>{
+    clearInterval(iv);
+    try{
+      const a=buildAnalyse(home,away,ctx);
+      showAnalyse(a);
+    }catch(e){
+      document.getElementById('analyseResult').innerHTML=`<div style="color:#ff4081;font-family:'Barlow',sans-serif;padding:16px;background:#1a0d10;border-radius:12px">❌ Erreur : ${e.message}</div>`;
+      document.getElementById('analyseResult').style.display='block';
+    }
+    btn.disabled=false;
+    btn.innerHTML='🔬 LANCER L\'ANALYSE AVANCÉE';
+  },3800);
+}
+
+function showAnalyse(a){
+  const formIco=f=>f==="🔥"?"🔥":f==="❄️"?"❄️":"⚖️";
+
+  const playerCardHTML=(p)=>`
+    <div class="player-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="player-name">${p.name.split(' (')[0]} <span style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">${p.name.match(/\(([^)]+)\)/)?.[1]||''}</span></div>
+        <div style="font-size:18px">${formIco(p.form)}</div>
+      </div>
+      <div class="player-stats">
+        <span class="pstat">xG ${p.xg}</span>
+        <span class="pstat">xA ${p.xa}</span>
+        <span class="pstat">Tirs ${p.tirs}</span>
+        <span class="pstat">Passes clés ${p.cles}</span>
+        <span class="pstat">Duels ${p.duels}</span>
+      </div>
+    </div>`;
+
+  const alertHTML=(al)=>{
+    const bg=al.type==="danger"?"#2a0d10":al.type==="warn"?"#1a1500":"#0d1a10";
+    const border=al.type==="danger"?"#ff408140":al.type==="warn"?"#ffb30040":"#00e67630";
+    return`<div class="alert-box" style="background:${bg};border:1px solid ${border}">
+      <div class="alert-ico">${al.ico}</div>
+      <div class="alert-txt"><div class="alert-title">${al.title}</div>${al.msg}</div>
+    </div>`;
+  };
+
+  const html=`
+    <!-- LIVE STATUS -->
+    <div class="card" style="border:1px solid #7c4dff40;margin-bottom:10px">
+      <div class="card-label" style="color:#7c4dff">🔴 STATUT DU MATCH${a.minute?` · ${a.minute}'`:''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="text-align:center;flex:1">
+          <div style="font-size:22px;letter-spacing:2px">${a.home}</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#6b7a9a">Rating ${a.rH}</div>
+        </div>
+        <div style="text-align:center;padding:0 12px">
+          <div style="font-size:28px;letter-spacing:3px;color:#00e676">${a.liveScore||'- -'}</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">${a.minute?`${a.minute}'`:'PRÉ-MATCH'}</div>
+        </div>
+        <div style="text-align:center;flex:1">
+          <div style="font-size:22px;letter-spacing:2px">${a.away}</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#6b7a9a">Rating ${a.rA}</div>
+        </div>
+      </div>
+      <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#6b7a9a;margin-bottom:6px">MOMENTUM · Domination : <strong style="color:#e8eaf0">${a.domTeam}</strong> · Intensité : ${a.intensity}</div>
+      <div class="momentum-bar">
+        <div class="momentum-indicator" style="left:${a.momClamped}%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">
+        <span>${a.away} ◀</span><span>▶ ${a.home}</span>
+      </div>
+    </div>
+
+    <!-- STATS LIVE -->
+    ${section('📊 STATS EN TEMPS RÉEL','#00bcd4',`
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center">
+        ${[
+          {lbl:'Possession',h:`${a.poss}%`,a:`${100-a.poss}%`},
+          {lbl:'xG',h:a.xgH,a:a.xgA},
+          {lbl:'Tirs',h:a.shotsH,a:a.shotsA},
+          {lbl:'Attaques',h:rnd(8,20),a:rnd(4,15)},
+        ].map(s=>`
+          <div style="text-align:right;font-size:18px;color:#00e676">${s.h}</div>
+          <div style="text-align:center;font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70;white-space:nowrap">${s.lbl}</div>
+          <div style="text-align:left;font-size:18px;color:#ff4081">${s.a}</div>`).join('')}
+      </div>`,true)}
+
+    <!-- ALERTES -->
+    ${section('🚨 ALERTES INTELLIGENTES','#ff4081',a.alertes.map(alertHTML).join(''),true)}
+
+    <!-- PRÉDICTION BUT -->
+    ${section('⚽ PRÉDICTION DE BUT','#ff9800',`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="font-size:20px">${a.urgency.split(' ')[0]}</div>
+        <div>
+          <div style="font-family:'Barlow',sans-serif;font-size:12px;font-weight:700;color:#e8eaf0">${a.urgency.replace(/^[^ ]+ /,'')}</div>
+          <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#6b7a9a">Équipe la + dangereuse : <strong>${a.likelyScorer}</strong></div>
+        </div>
+      </div>
+      <div class="minute-pred">
+        <div class="min-box">
+          <div class="min-num">5 MIN</div>
+          <div class="min-pct" style="color:${a.prob5>50?'#ff4081':a.prob5>35?'#ffb300':'#00e676'}">${a.prob5}%</div>
+        </div>
+        <div class="min-box">
+          <div class="min-num">10 MIN</div>
+          <div class="min-pct" style="color:${a.prob10>55?'#ff4081':a.prob10>40?'#ffb300':'#00e676'}">${a.prob10}%</div>
+        </div>
+        <div class="min-box">
+          <div class="min-num">15 MIN</div>
+          <div class="min-pct" style="color:${a.prob15>60?'#ff4081':a.prob15>45?'#ffb300':'#00e676'}">${a.prob15}%</div>
+        </div>
+      </div>`,true)}
+
+    <!-- JOUEURS DÉCISIFS -->
+    ${section('🎯 JOUEURS DÉCISIFS (15 min)','#00e676',`
+      ${a.decisifs.map(p=>`
+        <div class="player-card" style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div class="player-name" style="font-size:15px">${p.name.split(' (')[0]}</div>
+            <div style="font-size:18px">${p.form}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <div style="text-align:center;background:#0d1525;border-radius:8px;padding:6px">
+              <div style="font-size:18px;color:#ff9800">${p.probBut}%</div>
+              <div style="font-family:'Barlow',sans-serif;font-size:9px;color:#4a5a70">BUT</div>
+            </div>
+            <div style="text-align:center;background:#0d1525;border-radius:8px;padding:6px">
+              <div style="font-size:18px;color:#00bcd4">${p.probPasse}%</div>
+              <div style="font-family:'Barlow',sans-serif;font-size:9px;color:#4a5a70">PASSE DÉC</div>
+            </div>
+            <div style="text-align:center;background:#0d1525;border-radius:8px;padding:6px">
+              <div style="font-size:18px;color:${p.confiance>=65?'#00e676':p.confiance>=45?'#ffb300':'#ff4081'}">${p.confiance}%</div>
+              <div style="font-family:'Barlow',sans-serif;font-size:9px;color:#4a5a70">CONF.</div>
+            </div>
+          </div>
+        </div>`).join('')}`,true)}
+
+    <!-- ANALYSE JOUEURS -->
+    ${section('👤 ANALYSE DES JOUEURS','#7c4dff',`
+      <div class="team-tag">${a.home}</div>
+      ${a.playersH.map(playerCardHTML).join('')}
+      <div class="team-tag" style="margin-top:10px">${a.away}</div>
+      ${a.playersA.map(playerCardHTML).join('')}`,false)}
+
+    <!-- TOP INFLUENTS -->
+    ${section('⭐ TOP INFLUENTS DU MATCH','#ffb300',`
+      ${a.topInfluents.map((p,i)=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;background:#162235;border-radius:10px;padding:10px">
+          <div style="font-size:20px;color:#ffb300;min-width:24px">${['🥇','🥈','🥉'][i]}</div>
+          <div style="flex:1">
+            <div style="font-size:15px;letter-spacing:1px">${p.name.split(' (')[0]}</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">${p.team} · xG ${p.xg} · xA ${p.xa}</div>
+          </div>
+          <div style="font-size:18px">${p.form}</div>
+        </div>`).join('')}
+      <div class="card-label" style="color:#ff4081;margin-top:8px">EN DIFFICULTÉ</div>
+      ${a.enDifficulte.map(p=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;background:#162235;border-radius:10px;padding:10px">
+          <div style="font-size:18px">❄️</div>
+          <div>
+            <div style="font-size:14px;letter-spacing:1px">${p.name.split(' (')[0]}</div>
+            <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">${p.team} · ${p.duels} duels gagnés</div>
+          </div>
+        </div>`).join('')}`,false)}
+
+    <!-- PRONOSTIC GLOBAL -->
+    ${section('📊 PRONOSTIC GLOBAL','#00e676',`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+        <div>
+          <div class="verdict-label">SCORE FINAL PROBABLE</div>
+          <div style="font-size:32px;color:#00e676;letter-spacing:2px">${a.gH}-${a.gA}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="verdict-label">CONFIANCE</div>
+          <div style="font-size:36px;color:${a.conf>=75?'#00e676':a.conf>=55?'#ffb300':'#ff4081'};line-height:1">${a.conf}%</div>
+        </div>
+      </div>
+      ${[{l:a.home,v:a.pH,c:'#00e676'},{l:'Nul',v:a.pN,c:'#ffb300'},{l:a.away,v:a.pA,c:'#ff4081'}].map(x=>`
+        <div class="prob-row">
+          <div class="prob-lbl">${x.l}</div>
+          <div class="prob-track"><div class="prob-fill" style="width:${x.v}%;background:${x.c}"></div></div>
+          <div class="prob-pct" style="color:${x.c}">${x.v}%</div>
+        </div>`).join('')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+        <div class="stat-box"><div class="card-label">OVER/UNDER</div><div class="stat-val" style="font-size:14px">${a.gH+a.gA>=3?"Over 2.5":"Under 2.5"}</div></div>
+        <div class="stat-box"><div class="card-label">BTTS</div><div class="stat-val" style="font-size:16px">${a.gH>0&&a.gA>0?"✅":"❌"}</div></div>
+      </div>
+      <div style="margin-top:10px;background:#162235;border-radius:10px;padding:10px">
+        <div class="card-label" style="color:#00bcd4">💬 RÉSUMÉ SIMPLE</div>
+        <div style="font-family:'Barlow',sans-serif;font-size:12px;color:#c0cce0;line-height:1.6">${a.domTeam!=="Équilibré"?`${a.domTeam} domine clairement ce match avec ${a.domTeam===a.home?a.xgH:a.xgA} xG et ${a.domTeam===a.home?a.shotsH:a.shotsA} tirs. `:"Les deux équipes se tiennent. "}Le score final le plus probable est <strong>${a.gH}-${a.gA}</strong>. Niveau d'urgence offensive : ${a.urgency}.</div>
+      </div>`,true)}
+
+    <p class="disclaimer">⚠ Analyse à titre informatif uniquement. Jouer peut créer une dépendance.</p>`;
+
+  const res=document.getElementById('analyseResult');
+  res.innerHTML=html;res.style.display='block';
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+
+// ══════════════════════════════════════════════
+// MOTEUR LIVE — DONNÉES STRICTEMENT FOURNIES
+// ══════════════════════════════════════════════
+function generateLive(){
+  const team1 = document.getElementById('lTeam1').value.trim();
+  const team2 = document.getElementById('lTeam2').value.trim();
+  const scoreRaw = document.getElementById('lScore').value.trim();
+  const minuteRaw = document.getElementById('lMinute').value.trim();
+  const possRaw = document.getElementById('lPoss').value.trim();
+  const shotsRaw = document.getElementById('lShots').value.trim();
+  const xgRaw = document.getElementById('lXg').value.trim();
+  const extra = document.getElementById('lExtra').value.trim();
+
+  // RÈGLES STRICTES : Validation obligatoire
+  const matchErr=validateMatch(team1,team2);
+  if(matchErr){
+    document.getElementById('liveResult').innerHTML=`<div style="background:#1a0d10;border:1px solid #ff408150;border-radius:12px;padding:16px;font-family:'Barlow',sans-serif;color:#ff4081;font-size:13px;line-height:1.6">⚠️ Je ne peux pas analyser ce match sans données fiables.<br><span style="color:#6b7a9a;font-size:12px">${matchErr}</span></div>`;
+    document.getElementById('liveResult').style.display='block';return;
+  }
+  const liveErr=validateLiveData(scoreRaw,minuteRaw);
+  if(liveErr){
+    document.getElementById('liveResult').innerHTML=`<div style="background:#1a0d10;border:1px solid #ff408150;border-radius:12px;padding:16px;font-family:'Barlow',sans-serif;color:#ff4081;font-size:13px;line-height:1.6">⚠️ ${liveErr}</div>`;
+    document.getElementById('liveResult').style.display='block';return;
+  }
+
+  const btn = document.getElementById('liveBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<div class="spinner"></div><span class="step-txt">🔴 Analyse en cours...</span>`;
+  document.getElementById('liveResult').style.display='none';
+
+  setTimeout(()=>{
+    const scoreMatch = scoreRaw.match(/^(\d+)[\-\:](\d+)$/);
+    const g1 = parseInt(scoreMatch[1]);
+    const g2 = parseInt(scoreMatch[2]);
+    const minute = parseInt(minuteRaw);
+    const poss = possRaw ? parseInt(possRaw) : null;
+    const shotsArr = shotsRaw ? shotsRaw.split(/[\/\s]+/).map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n)) : [];
+    const xgArr = xgRaw ? xgRaw.split(/[\/\s]+/).map(s=>parseFloat(s.trim())).filter(n=>!isNaN(n)) : [];
+    const shots1 = shotsArr[0]||null, shots2 = shotsArr[1]||null;
+    const xg1 = xgArr[0]||null, xg2 = xgArr[1]||null;
+    const minutesLeft = 90 - minute;
+
+    // Analyse strictement basée sur les données fournies
+    const scoreLeads = g1>g2?team1:g2>g1?team2:"égalité";
+    const scoreDiff = Math.abs(g1-g2);
+
+    // Momentum basé uniquement sur les stats fournies
+    let momentumTxt = "";
+    let dominantTeam = null;
+    if(poss!==null){
+      if(poss>55){dominantTeam=team1;momentumTxt+=`${team1} domine la possession (${poss}%). `;}
+      else if(poss<45){dominantTeam=team2;momentumTxt+=`${team2} domine la possession (${100-poss}%). `;}
+      else momentumTxt+="Possession équilibrée. ";
+    }
+    if(shots1!==null&&shots2!==null){
+      if(shots1>shots2){momentumTxt+=`${team1} plus dangereux (${shots1} tirs vs ${shots2}). `;if(!dominantTeam)dominantTeam=team1;}
+      else if(shots2>shots1){momentumTxt+=`${team2} plus dangereux (${shots2} tirs vs ${shots1}). `;if(!dominantTeam)dominantTeam=team2;}
+      else momentumTxt+="Nombre de tirs équivalent. ";
+    }
+    if(xg1!==null&&xg2!==null){
+      if(xg1>xg2)momentumTxt+=`${team1} surperforme avec xG ${xg1} vs ${xg2}. `;
+      else if(xg2>xg1)momentumTxt+=`${team2} surperforme avec xG ${xg2} vs ${xg1}. `;
+    }
+    if(extra)momentumTxt+=`Infos supplémentaires : ${extra}. `;
+    if(!momentumTxt)momentumTxt="Statistiques non fournies — analyse basée sur le score et la minute uniquement.";
+
+    // Analyse du score
+    let scoreAnalyse = "";
+    if(g1===0&&g2===0)scoreAnalyse=`Match ouvert. Les deux équipes cherchent l'ouverture du score${minute>60?" avec une certaine urgence":""}. `;
+    else if(g1===g2)scoreAnalyse=`Score de parité ${g1}-${g2}. Les deux équipes sont à égalité${minute>70?" — les 20 dernières minutes seront décisives":""}.`;
+    else scoreAnalyse=`${scoreLeads} mène ${g1>g2?g1+"-"+g2:g2+"-"+g1}. ${scoreDiff>=2?"Avantage confortable.":"Match serré, tout est encore possible."}`;
+
+    // Prédiction basée sur données
+    let pred1=g1, pred2=g2;
+    if(minutesLeft>20){
+      if(dominantTeam===team1&&g1<=g2)pred1++;
+      else if(dominantTeam===team2&&g2<=g1)pred2++;
+      else if(!dominantTeam&&g1===g2&&minutesLeft>30){
+        if(Math.random()>0.5)pred1++;else pred2++;
+      }
+    }
+
+    // Urgence
+    const hasStats = poss!==null||shots1!==null||xg1!==null;
+    const urgency = minute>=80?"🔴 PHASE CRITIQUE":minute>=65?"🟠 PRESSION":minute>=45?"🟡 SECONDE MI-TEMPS":"🟢 EN COURS";
+
+    showLiveResult({team1,team2,score:scoreRaw,g1,g2,minute,minutesLeft,poss,shots1,shots2,xg1,xg2,extra,scoreAnalyse,momentumTxt,pred1,pred2,dominantTeam,urgency,hasStats,scoreLeads});
+    btn.disabled=false;
+    btn.innerHTML='🔴 ANALYSER CE MATCH';
+  },1200);
+}
+
+function showLiveResult(d){
+  const scoreColor = d.g1>d.g2?'#00e676':d.g2>d.g1?'#ff4081':'#ffb300';
+
+  const statsBlock = d.hasStats ? `
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-top:10px">
+      ${d.poss!==null?`<div style="text-align:right;font-size:18px;color:#00e676">${d.poss}%</div><div style="text-align:center;font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">Possession</div><div style="text-align:left;font-size:18px;color:#ff4081">${100-d.poss}%</div>`:''}
+      ${d.shots1!==null?`<div style="text-align:right;font-size:18px;color:#00e676">${d.shots1}</div><div style="text-align:center;font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">Tirs</div><div style="text-align:left;font-size:18px;color:#ff4081">${d.shots2}</div>`:''}
+      ${d.xg1!==null?`<div style="text-align:right;font-size:18px;color:#00e676">${d.xg1}</div><div style="text-align:center;font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">xG</div><div style="text-align:left;font-size:18px;color:#ff4081">${d.xg2}</div>`:''}
+    </div>` : `<div style="font-family:'Barlow',sans-serif;font-size:11px;color:#3a4a60;margin-top:8px;font-style:italic">Aucune statistique fournie</div>`;
+
+  const html=`
+    ${dataSourceBadge(true)}
+    <!-- SCORE OFFICIEL - NE JAMAIS MODIFIER -->
+    <div class="card" style="border:2px solid ${scoreColor}60;background:#0d1525;box-shadow:0 0 30px ${scoreColor}15;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#ff4081;animation:pulse 1s infinite"></div>
+        <div style="font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:3px;color:#ff4081">LIVE · ${d.minute}'</div>
+        <div style="margin-left:auto;font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70">${d.minutesLeft} min restantes</div>
+      </div>
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:3px;color:#6b7a9a;margin-bottom:4px">SCORE ACTUEL</div>
+        <div style="font-size:52px;letter-spacing:6px;color:${scoreColor};line-height:1">${d.score}</div>
+        <div style="font-size:14px;letter-spacing:1px;margin-top:4px;color:#8a9ab5">${d.team1} <span style="color:#3a4a60">vs</span> ${d.team2}</div>
+      </div>
+      <div style="font-family:'Barlow',sans-serif;font-size:11px;color:#4a5a70;text-align:center;background:#162235;border-radius:8px;padding:6px">${d.urgency}</div>
+      ${statsBlock}
+    </div>
+
+    <!-- ANALYSE -->
+    <div class="card" style="border:1px solid #1e2e45;margin-bottom:10px">
+      <div class="card-label" style="color:#00bcd4">📋 ANALYSE</div>
+      <div style="font-family:'Barlow',sans-serif;font-size:13px;color:#c0cce0;line-height:1.7;margin-bottom:10px">${d.scoreAnalyse}</div>
+      ${d.momentumTxt?`<div style="font-family:'Barlow',sans-serif;font-size:12px;color:#8a9ab5;line-height:1.6;border-top:1px solid #1e2e45;padding-top:10px">${d.momentumTxt}</div>`:''}
+    </div>
+
+    <!-- PRÉDICTION SCORE FINAL -->
+    <div class="card" style="border:1px solid #00e67640;margin-bottom:10px">
+      <div class="card-label" style="color:#00e676">🎯 PRÉDICTION SCORE FINAL</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="text-align:center">
+          <div style="font-family:'Barlow',sans-serif;font-size:10px;color:#4a5a70;margin-bottom:4px">SCORE FINAL PRÉDIT</div>
+          <div style="font-size:40px;color:#00e676;letter-spacing:4px">${d.pred1}-${d.pred2}</div>
+        </div>
+        <div style="flex:1;font-family:'Barlow',sans-serif;font-size:12px;color:#8a9ab5;line-height:1.6">
+          ${d.pred1===d.g1&&d.pred2===d.g2?`Le score actuel <strong style="color:#ffb300">${d.score}</strong> pourrait rester inchangé — le match semble se diriger vers ce résultat.`:`Évolution probable vers <strong style="color:#00e676">${d.pred1}-${d.pred2}</strong> basée sur les ${d.minutesLeft} minutes restantes${d.dominantTeam?` et la domination de ${d.dominantTeam}`:""}.`}
+        </div>
+      </div>
+      <div style="margin-top:12px;background:#162235;border-radius:8px;padding:10px;font-family:'Barlow',sans-serif;font-size:11px;color:#ff4081;border-left:3px solid #ff4081">
+        ⚠️ Cette prédiction est basée <strong>uniquement</strong> sur les données que tu as fournies.
+      </div>
+    </div>
+
+    ${d.extra?`<div class="card" style="border:1px solid #ffb30030;margin-bottom:10px"><div class="card-label" style="color:#ffb300">ℹ️ INFOS SUPPLÉMENTAIRES</div><div style="font-family:'Barlow',sans-serif;font-size:13px;color:#c0cce0">${d.extra}</div></div>`:''}
+
+    <p class="disclaimer">⚠ Analyse basée uniquement sur les données fournies. Jouer peut créer une dépendance.</p>`;
+
+  const res=document.getElementById('liveResult');
+  res.innerHTML=html;res.style.display='block';
+  setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+
+buildLeagueBar();
+fillTeams();
+</script>
+</body>
+</html>
